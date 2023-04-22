@@ -8,3 +8,4 @@ Browser application runs FDTD EM simulation and renders to canvas along the way.
 
 ## References
 - https://eecs.wsu.edu/~schneidj/ufdtd/
+- https://en.wikipedia.org/wiki/Finite-difference_time-domain_method

@@ -16,6 +16,8 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
     var initSolver = results.instance.exports.initSolver;
     var getNX = results.instance.exports.getNX;
     var getNY = results.instance.exports.getNY;
+    var getEta0 = results.instance.exports.getEta0;
+    var getVel0 = results.instance.exports.getVel0;
 
     var initDataBuffer = results.instance.exports.initDataBuffer;
     var renderDataBuffer = results.instance.exports.renderDataBuffer;
@@ -49,7 +51,10 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
     console.log(dataPtr);
 
     initSolver(-1.0, 0.01, -1.0, 0.01);
-    console.log([getNX(), getNY()]);
+    console.log(['NX=' + getNX(), 'NY=' + getNY()]);
+
+    console.log('vacuum impendance = ' + getEta0());
+    console.log('vacuum velocity = ' + getVel0());
 
     const ctx = canvas.getContext('2d');
     

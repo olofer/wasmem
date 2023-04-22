@@ -20,11 +20,15 @@ uint32_t rgb_value(int r, int g, int b) {
 extern "C" {
 
 EMSCRIPTEN_KEEPALIVE
-void initSolver(double xmin, double deltax,
-                double ymin, double deltay)
+void initSolver(double xmin, 
+                double deltax,
+                double ymin, 
+                double deltay)
 {
-  sim.initialize(xmin, deltax, 
-                 ymin, deltay);
+  sim.initialize(xmin, 
+                 deltax, 
+                 ymin, 
+                 deltay);
 }
 
 EMSCRIPTEN_KEEPALIVE
@@ -38,7 +42,19 @@ int getNY(void) {
 }
 
 EMSCRIPTEN_KEEPALIVE
-uint32_t* initDataBuffer(int offset, int w, int h)
+double getEta0(void) {
+  return TMz::vacuum_impedance;
+}
+
+EMSCRIPTEN_KEEPALIVE
+double getVel0(void) {
+  return TMz::vacuum_velocity;
+}
+
+EMSCRIPTEN_KEEPALIVE
+uint32_t* initDataBuffer(int offset, 
+                         int w, 
+                         int h)
 {
   uint32_t* data = reinterpret_cast<uint32_t*>(offset);
   std::memset(data, 0, sizeof(uint32_t) * w * h);
@@ -46,7 +62,10 @@ uint32_t* initDataBuffer(int offset, int w, int h)
 }
 
 EMSCRIPTEN_KEEPALIVE
-void renderDataBuffer(int offset, int gvalue, int w, int h)
+void renderDataBuffer(int offset, 
+                      int gvalue, 
+                      int w, 
+                      int h)
 {
   uint32_t* data = reinterpret_cast<uint32_t*>(offset);
   for (int i = 0; i < w; i++) {
