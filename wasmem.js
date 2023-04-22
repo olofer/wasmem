@@ -13,6 +13,10 @@ var importObject = {
 WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
 .then((results) =>
 {
+    var initSolver = results.instance.exports.initSolver;
+    var getNX = results.instance.exports.getNX;
+    var getNY = results.instance.exports.getNY;
+
     var initDataBuffer = results.instance.exports.initDataBuffer;
     var renderDataBuffer = results.instance.exports.renderDataBuffer;
     
@@ -43,6 +47,9 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
 
     const dataPtr = initDataBuffer(dataArray.byteOffset, width, height);
     console.log(dataPtr);
+
+    initSolver(-1.0, 0.01, -1.0, 0.01);
+    console.log([getNX(), getNY()]);
 
     const ctx = canvas.getContext('2d');
     

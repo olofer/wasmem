@@ -2,6 +2,13 @@
 #include <cstring>
 #include <cmath>
 
+#include "fdtd-tmz.hpp"
+
+const int NX = 200;
+const int NY = 120;
+
+static TMz::fdtdSolver<NX, NY> sim;
+
 uint32_t rgba_value(int r, int g, int b, int a) {
   return (a << 24) | (b << 16) | (g << 8) | r;
 }
@@ -11,6 +18,24 @@ uint32_t rgb_value(int r, int g, int b) {
 }
 
 extern "C" {
+
+EMSCRIPTEN_KEEPALIVE
+void initSolver(double xmin, double deltax,
+                double ymin, double deltay)
+{
+  sim.initialize(xmin, deltax, 
+                 ymin, deltay);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int getNX(void) {
+  return sim.getNX();
+}
+
+EMSCRIPTEN_KEEPALIVE
+int getNY(void) {
+  return sim.getNY();
+}
 
 EMSCRIPTEN_KEEPALIVE
 uint32_t* initDataBuffer(int offset, int w, int h)
