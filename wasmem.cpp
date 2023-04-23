@@ -50,6 +50,21 @@ double getVel0(void) {
 }
 
 EMSCRIPTEN_KEEPALIVE
+double getCourant(void) {
+  return TMz::courant_factor;
+}
+
+EMSCRIPTEN_KEEPALIVE
+double getDelta(void) {
+  return sim.getDelta();
+}
+
+EMSCRIPTEN_KEEPALIVE
+double getTimestep(void) {
+  return sim.getTimestep();
+}
+
+EMSCRIPTEN_KEEPALIVE
 uint32_t* initDataBuffer(int offset, 
                          int w, 
                          int h)

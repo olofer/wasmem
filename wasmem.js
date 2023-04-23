@@ -18,6 +18,9 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
     var getNY = results.instance.exports.getNY;
     var getEta0 = results.instance.exports.getEta0;
     var getVel0 = results.instance.exports.getVel0;
+    var getCourant = results.instance.exports.getCourant;
+    var getDelta = results.instance.exports.getDelta;
+    var getTimestep = results.instance.exports.getTimestep;
 
     var initDataBuffer = results.instance.exports.initDataBuffer;
     var renderDataBuffer = results.instance.exports.renderDataBuffer;
@@ -48,11 +51,14 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
     console.log(dataArray.length);
 
     const dataPtr = initDataBuffer(dataArray.byteOffset, width, height);
-    console.log(dataPtr);
 
     initSolver(-1.0, -1.0, 0.01);
-    console.log(['NX=' + getNX(), 'NY=' + getNY()]);
 
+    console.log('NX = ' + getNX());
+    console.log('NY = ' + getNY());
+    console.log('delta = ' + getDelta() + ' [m]');
+    console.log('timestep = ' + getTimestep() + '[s]');
+    console.log('Courant factor = ' + getCourant());
     console.log('vacuum impendance = ' + getEta0());
     console.log('vacuum velocity = ' + getVel0());
 

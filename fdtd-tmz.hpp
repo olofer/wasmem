@@ -1,7 +1,8 @@
 #pragma once
 
-// TODO: implement the basic stepper without any boundary treatment
+// TODO: implement the *basic stepper* without any boundary treatment; once that works, branch!
 // TODO: utility based on points-per-wavelength, to determine delta, deltat etc.. Courant number
+// TODO: bring in a viridis colormap array 256*3 ints; ...
 
 namespace TMz {
 
@@ -9,6 +10,7 @@ const double vacuum_permeability = 1.2566370621219 * 1.0e-6; // [N / A^2]
 const double vacuum_permittivity = 8.854187812813 * 1.0e-12; // [F / m]
 const double vacuum_impedance = std::sqrt(vacuum_permeability / vacuum_permittivity);
 const double vacuum_velocity = 1.0 / std::sqrt(vacuum_permeability * vacuum_permittivity);
+const double courant_factor = 1.0 / std::sqrt(2.0);
 
 template <int NX, int NY>
 class fdtdSolver
@@ -34,6 +36,7 @@ public:
   int getNY() const { return NY; }
 
   double getDelta() const { return xgrid[1] - xgrid[0]; }
+  double getTimestep() const { return (getDelta() * courant_factor / vacuum_velocity); }
 
   double getXmin() const { return xgrid[0]; }
   double getXmax() const { return xgrid[NX - 1]; }
@@ -52,19 +55,17 @@ public:
     // ...
   }
 
-  // TODO: set stepper coefficients given deltat etc..
+  void updateHxHy() {
+    // ... (pay attention to temp buffering)
+  }
 
   void updateEz() {
     // ... (pay attention to temp buffering)
   }
 
-  void updateHxHy() {
-    // ... (pay attention to temp buffering)
-  }
-
   void update() {
-    updateEz();
     updateHxHy();
+    updateEz();
   }
 
   void rasterize(uint32_t* imgdata, 
@@ -87,6 +88,10 @@ private:
   double Hx[NX * NY]; // at t - 0.5 * deltat
   double Hy[NX * NY]; // at t - 0.5 * deltat
   double Ez[NX * NY]; // at t
+
+  int index(int ix, int iy) const {
+    return NX * iy + ix;
+  }
 };
 
 }
