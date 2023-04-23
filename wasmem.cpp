@@ -20,6 +20,16 @@ uint32_t rgb_value(int r, int g, int b) {
 extern "C" {
 
 EMSCRIPTEN_KEEPALIVE
+void* simulatorAddress(void) {
+  return reinterpret_cast<void*>(&sim);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int simulatorBytesize(void) {
+  return sizeof(sim);
+}
+
+EMSCRIPTEN_KEEPALIVE
 void initSolver(double xmin, 
                 double ymin, 
                 double delta)
@@ -27,6 +37,21 @@ void initSolver(double xmin,
   sim.initialize(xmin, 
                  ymin, 
                  delta);
+}
+
+EMSCRIPTEN_KEEPALIVE
+void takeOneTimestep(void) {
+  sim.update();
+}
+
+EMSCRIPTEN_KEEPALIVE
+double getDelta(void) {
+  return sim.getDelta();
+}
+
+EMSCRIPTEN_KEEPALIVE
+double getTimestep(void) {
+  return sim.getTimestep();
 }
 
 EMSCRIPTEN_KEEPALIVE
@@ -55,13 +80,13 @@ double getCourant(void) {
 }
 
 EMSCRIPTEN_KEEPALIVE
-double getDelta(void) {
-  return sim.getDelta();
+double minimumEz(void) {
+  return sim.minimumEz();
 }
 
 EMSCRIPTEN_KEEPALIVE
-double getTimestep(void) {
-  return sim.getTimestep();
+double maximumEz(void) {
+  return sim.maximumEz();
 }
 
 EMSCRIPTEN_KEEPALIVE
