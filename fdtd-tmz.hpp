@@ -1,6 +1,7 @@
 #pragma once
 
-// TODO: simplify to set delta = deltax = deltay always ?! arguments for and against ?!
+// TODO: implement the basic stepper without any boundary treatment
+// TODO: utility based on points-per-wavelength, to determine delta, deltat etc.. Courant number
 
 namespace TMz {
 
@@ -14,16 +15,15 @@ class fdtdSolver
 {
 public:
   void initialize(double xmin, 
-                  double deltax,
                   double ymin, 
-                  double deltay)
+                  double delta)
   {
     for (int i = 0; i < NX; i++) {
-      xgrid[i] = xmin + i * deltax;
+      xgrid[i] = xmin + i * delta;
     }
 
     for (int i = 0; i < NY; i++) {
-      ygrid[i] = ymin + i * deltay;
+      ygrid[i] = ymin + i * delta;
     }
 
     zero();
@@ -33,8 +33,12 @@ public:
   int getNX() const { return NX; }
   int getNY() const { return NY; }
 
-  double getDeltaX() const { return xgrid[1] - xgrid[0]; }
-  double getDeltaY() const { return ygrid[1] - ygrid[0]; }
+  double getDelta() const { return xgrid[1] - xgrid[0]; }
+
+  double getXmin() const { return xgrid[0]; }
+  double getXmax() const { return xgrid[NX - 1]; }
+  double getYmin() const { return ygrid[0]; }
+  double getYmax() const { return ygrid[NY - 1]; }
 
   void zero() {
     std::memset(Hx, 0, NX * NY * sizeof(double));
@@ -43,6 +47,8 @@ public:
   }
 
   void setUniformVacuum() {
+    // ...
+    // TODO: zero conductivities, vacuum perms
     // ...
   }
 
@@ -59,6 +65,15 @@ public:
   void update() {
     updateEz();
     updateHxHy();
+  }
+
+  void rasterize(uint32_t* imgdata, 
+                 int w, 
+                 int h) const
+  {
+    // TODO: render the Ez field to pixel data using bilinear interpolation
+    // (a viewport is rendered onto the image; not necessary to rasterize the full field; zoom in possible)
+    // default is full xrange onto 0..w-1, full yrange onto 0..h-1 but reversed so that pos. axis is upwards
   }
 
 private:

@@ -50,7 +50,7 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
     const dataPtr = initDataBuffer(dataArray.byteOffset, width, height);
     console.log(dataPtr);
 
-    initSolver(-1.0, 0.01, -1.0, 0.01);
+    initSolver(-1.0, -1.0, 0.01);
     console.log(['NX=' + getNX(), 'NY=' + getNY()]);
 
     console.log('vacuum impendance = ' + getEta0());

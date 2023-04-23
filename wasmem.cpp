@@ -21,14 +21,12 @@ extern "C" {
 
 EMSCRIPTEN_KEEPALIVE
 void initSolver(double xmin, 
-                double deltax,
                 double ymin, 
-                double deltay)
+                double delta)
 {
   sim.initialize(xmin, 
-                 deltax, 
                  ymin, 
-                 deltay);
+                 delta);
 }
 
 EMSCRIPTEN_KEEPALIVE
