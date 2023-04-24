@@ -30,6 +30,8 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
     var minimumEz = results.instance.exports.minimumEz;
     var maximumEz = results.instance.exports.maximumEz;
 
+    var fieldEnergyEz = results.instance.exports.fieldEnergyEz;
+
     var initDataBuffer = results.instance.exports.initDataBuffer;
     var renderDataBufferTestPattern = results.instance.exports.renderDataBufferTestPattern;
     var renderDataBufferEz = results.instance.exports.renderDataBufferEz;
@@ -64,6 +66,10 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
 
         if (key == 'r' || key == 'R') {
             resetSolver();
+        }
+
+        if (key == 'e' || key == 'E') {
+            console.log('E-field energy = ' + fieldEnergyEz() + ' [J / m]');
         }
     }
 

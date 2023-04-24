@@ -24,7 +24,7 @@ public:
       ygrid[iy] = ymin + iy * delta;
     }
 
-    setUniformMedium(1.0, 1.0);
+    setUniformMedium(1.0, 1.0, 0.0, 0.0);
     reset();
   }
 
@@ -54,26 +54,70 @@ public:
     std::memset(Ez, 0, NX * NY * sizeof(double));
   }
 
-  // assumes sigma = sigmam = 0.0 (TODO: generalize)
+  // NOTE: conductivities are not yet tested
   void setUniformMedium(double mur, 
-                        double epr)
+                        double epr,
+                        double sigmam,
+                        double sigma)
   {
+    relativePermeability = mur; // stash these for energy accounting (TBD)
+    relativePermittivity = epr;
+
+    const double CH = courant_factor / (mur * vacuum_impedance);
+    const double CE = vacuum_impedance * courant_factor / epr;
+
+    const double SH = (sigmam * getDelta() / 2.0) * CH;
+    const double AHh = (1.0 - SH) / (1.0 + SH);
+    const double AHe = 1.0 / (1.0 + SH);
+
+    const double SE = (sigma * getDelta() / 2.0) * CE;
+    const double AEh = 1.0 / (1.0 + SE);
+    const double AEe = (1.0 - SE) / (1.0 + SE);
+
     for (int ix = 0; ix < NX; ix++) {
       for (int iy = 0; iy < NY; iy++) {
         const int idx = index(ix, iy);
 
-        chxh[idx] = 1.0;
-        chxe[idx] = courant_factor / (mur * vacuum_impedance);
+        chxh[idx] = AHh;
+        chxe[idx] = AHe * CH;
 
-        chyh[idx] = 1.0;
-        chye[idx] = courant_factor / (mur * vacuum_impedance);
+        chyh[idx] = AHh;
+        chye[idx] = AHe * CH;
 
-        cezh[idx] = vacuum_impedance * courant_factor / epr;
-        ceze[idx] = 1.0;
+        cezh[idx] = AEh * CE;
+        ceze[idx] = AEe;
       }
     }
   }
 
+  // NOTE: approximate; may require more work to get this accurate
+  double energyE() const {
+    double sum = 0.0;
+    for (int iy = 0; iy < NY; iy++) {
+      for (int ix = 0; ix < NX; ix++) {
+        const double Ezi = Ez[index(ix, iy)];
+        sum += Ezi * Ezi;
+      }
+    }
+    const double delta = getDelta();
+    return relativePermittivity * vacuum_permittivity * sum * delta * delta / 2.0;
+  }
+/*
+  // NOTE: approximate; requires more thinking to get this accurate
+  double energyB() const {
+    double sum = 0.0;
+    for (int iy = 0; iy < NY - 1; iy++) {
+      for (int ix = 0; ix < NX - 1; ix++) {
+        const int idx =  index(ix, iy);
+        const double Hxi = Hx[idx];
+        const double Hyi = Hy[idx];
+        sum += Hxi * Hxi + Hyi * Hyi;
+      }
+    }
+    const double delta = getDelta();
+    return sum * delta * delta / (2.0 * relativePermeability * vacuum_permeability);
+  }
+*/
   void updateHxHy() {
     for (int ix = 0; ix < NX; ix++) {
       for (int iy = 0; iy < NY - 1; iy++) {
@@ -101,17 +145,19 @@ public:
     }
   }
 
+  // FIXME 2: harmonic, ricker, none; also source ppw editable
+
   void updateSource(double ppw) {
     const double lambda = getDelta() * ppw;
     const double omega = (2.0 * M_PI) * vacuum_velocity / lambda;
     const double time = updateCounter * getTimestep();
-    Ez[index(NX / 2, NY / 2)] = std::sin(omega * time);
+    Ez[index(3 * NX / 4, NY / 3)] = std::sin(omega * time);
   }
 
   void update() {
     updateHxHy();
     updateEz();
-    updateSource(10.0);
+    updateSource(30.0);
     updateCounter++;
   }
 
@@ -152,11 +198,16 @@ public:
     const double xupp = (xmax - xmin) / w; // x units per pixel
     const double yupp = (ymax - ymin) / h; // y units per pixel
 
+    const double xgmin = getXmin();
+    const double ygmin = getYmin();
+
     for (int i = 0; i < w; i++) {
       const double xi = xmin + i * xupp;
+      const double xhati = (xi - xgmin) / delta;
       for (int j = 0; j < h; j++) {
         const double yj = ymax - j * yupp;
-        const double Ezij = interpolateEz(xi, yj, delta);
+        const double yhatj = (yj - ygmin) / delta;
+        const double Ezij = interpolateEz(xhati, yhatj);
         imgdata[i + j * w] = rgb_viridis((Ezij - ezmin) / crange);
       }
     }
@@ -186,6 +237,10 @@ private:
   double Hy[NX * NY]; // at t - 0.5 * deltat
   double Ez[NX * NY]; // at t
 
+  // uniform medium (set properties)
+  double relativePermittivity;
+  double relativePermeability;
+
   // update coefficient arrays
   double chxh[NX * NY];
   double chxe[NX * NY];
@@ -202,9 +257,9 @@ private:
     return NX * iy + ix;
   }
 
-  double interpolateEz(double x, double y, double delta) const {
-    const double xhat = (x - xgrid[0]) / delta;
-    const double yhat = (y - ygrid[0]) / delta;
+  double interpolateEz(double xhat, 
+                       double yhat) const
+  {
     const int xi = (int) xhat;
     const int yi = (int) yhat;
     const double etax = xhat - xi;

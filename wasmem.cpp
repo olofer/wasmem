@@ -5,8 +5,8 @@
 #include "rgb-utils.hpp"
 #include "fdtd-tmz.hpp"
 
-const int NX = 200;
-const int NY = 120;
+const int NX = 300;
+const int NY = 175; // 300 / 175 = 1200 / 700 (same aspect ratio)
 
 static TMz::fdtdSolver<NX, NY> sim;
 
@@ -40,6 +40,11 @@ void takeOneTimestep(void) {
 EMSCRIPTEN_KEEPALIVE
 void resetSolver(void) {
   sim.reset();
+}
+
+EMSCRIPTEN_KEEPALIVE
+double fieldEnergyEz(void) {
+  return sim.energyE();
 }
 
 EMSCRIPTEN_KEEPALIVE
@@ -118,9 +123,9 @@ void renderDataBufferEz(int offset,
                   -1.0, 
                   1.0, 
                   sim.getXmin(), 
-                  sim.getXmax(),
+                  sim.getXmax() - 1.0e-8 * getDelta(),
                   sim.getYmin(),
-                  sim.getYmax());
+                  sim.getYmax() - 1.0e-8 * getDelta());
 }
 
 } // close extern "C"
