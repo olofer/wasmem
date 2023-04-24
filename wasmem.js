@@ -25,13 +25,14 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
     var getDelta = results.instance.exports.getDelta;
     var getTimestep = results.instance.exports.getTimestep;
     var takeOneTimestep = results.instance.exports.takeOneTimestep;
-
     var minimumEz = results.instance.exports.minimumEz;
     var maximumEz = results.instance.exports.maximumEz;
 
     var initDataBuffer = results.instance.exports.initDataBuffer;
-    var renderDataBuffer = results.instance.exports.renderDataBuffer;
+    var renderDataBufferTestPattern = results.instance.exports.renderDataBufferTestPattern;
     var renderDataBufferEz = results.instance.exports.renderDataBufferEz;
+
+    var showTestPattern = true;
     
     function keyDownEvent(e)
     {
@@ -50,6 +51,10 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
 
         if (key == 's' || key == 'S') {
             console.log(getDelta());
+        }
+
+        if (key == 'z' || key == 'Z') {
+            showTestPattern = !showTestPattern;
         }
     }
 
@@ -103,8 +108,7 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
     const dt = 0.001;
     var time = 0.0;
     var simTime = 0.0;
-
-    var greeness = 0;
+    var numFrames = 0;
    
     function main()
     {
@@ -122,21 +126,22 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
             time += dt;
         }
 
-        //renderDataBuffer(dataArray.byteOffset, greeness, width, height);
-        renderDataBufferEz(dataArray.byteOffset, width, height);
+        if (showTestPattern) {
+            renderDataBufferTestPattern(dataArray.byteOffset, width, height);
+        } else {
+            renderDataBufferEz(dataArray.byteOffset, width, height);
+        }
         ctx.putImageData(img, 0, 0);
+        numFrames += 1;
 
-        ctx.fillStyle = 'rgb(0, 0, 0)';
-        ctx.font = '16px Arial bold';
+        ctx.fillStyle = 'rgb(255, 255, 255)';
+        ctx.font = '18px Arial bold';
         ctx.fillText('clk. time =  ' + time.toFixed(3) + ' [s]', 10.0, 20.0);
         ctx.fillText('sim. time =  ' + (simTime * 1.0e9).toFixed(3) + ' [ns]', 10.0, 40.0);
-        ctx.fillText('    <fps> = ' + (greeness / time).toFixed(1) + ' [1/s]', 10.0, 60.0);
+        ctx.fillText('    <fps> = ' + (numFrames / time).toFixed(1) + ' [1/s]', 10.0, 60.0);
 
-        // one step per animation frame (TODO; reconfigure this based on CPU usage etc..)
         takeOneTimestep();
         simTime += getTimestep();
-
-        greeness += 1;
     }
     
     window.addEventListener('keydown', keyDownEvent);

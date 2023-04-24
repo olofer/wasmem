@@ -93,17 +93,12 @@ uint32_t* initDataBuffer(int offset,
 }
 
 EMSCRIPTEN_KEEPALIVE
-void renderDataBuffer(int offset, 
-                      int gvalue, 
-                      int w, 
-                      int h)
+void renderDataBufferTestPattern(int offset, 
+                                 int w, 
+                                 int h)
 {
   uint32_t* data = reinterpret_cast<uint32_t*>(offset);
-  for (int i = 0; i < w; i++) {
-    for (int j = 0; j < h; j++) {
-      data[i + j * w] = rgb_value(i % 255, gvalue % 255, j % 255);
-    }
-  }
+  sim.rasterizeTestPattern(data, w, h);
 }
 
 EMSCRIPTEN_KEEPALIVE

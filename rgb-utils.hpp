@@ -25,7 +25,7 @@ uint32_t rgb_viridis(int i) {
 }
 
 uint32_t rgb_viridis(double l) {
-  int i = static_cast<int>(l + 0.5);
+  int i = static_cast<int>(255.0 * l);
   if (i < 0) i = 0;
   if (i > 255) i = 255;
   return rgb_viridis(i);
