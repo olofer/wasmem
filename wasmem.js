@@ -31,6 +31,7 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
 
     var initDataBuffer = results.instance.exports.initDataBuffer;
     var renderDataBuffer = results.instance.exports.renderDataBuffer;
+    var renderDataBufferEz = results.instance.exports.renderDataBufferEz;
     
     function keyDownEvent(e)
     {
@@ -121,7 +122,8 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
             time += dt;
         }
 
-        renderDataBuffer(dataArray.byteOffset, greeness, width, height);
+        //renderDataBuffer(dataArray.byteOffset, greeness, width, height);
+        renderDataBufferEz(dataArray.byteOffset, width, height);
         ctx.putImageData(img, 0, 0);
 
         ctx.fillStyle = 'rgb(0, 0, 0)';

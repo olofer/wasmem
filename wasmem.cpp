@@ -2,20 +2,13 @@
 #include <cstring>
 #include <cmath>
 
+#include "rgb-utils.hpp"
 #include "fdtd-tmz.hpp"
 
 const int NX = 200;
 const int NY = 120;
 
 static TMz::fdtdSolver<NX, NY> sim;
-
-uint32_t rgba_value(int r, int g, int b, int a) {
-  return (a << 24) | (b << 16) | (g << 8) | r;
-}
-
-uint32_t rgb_value(int r, int g, int b) {
-  return rgba_value(r, g, b, 255);
-}
 
 extern "C" {
 
@@ -111,6 +104,23 @@ void renderDataBuffer(int offset,
       data[i + j * w] = rgb_value(i % 255, gvalue % 255, j % 255);
     }
   }
+}
+
+EMSCRIPTEN_KEEPALIVE
+void renderDataBufferEz(int offset, 
+                        int w, 
+                        int h)
+{
+  uint32_t* data = reinterpret_cast<uint32_t*>(offset);
+  sim.rasterizeEz(data, 
+                  w, 
+                  h, 
+                  -1.0, 
+                  1.0, 
+                  sim.getXmin(), 
+                  sim.getXmax(),
+                  sim.getYmin(),
+                  sim.getYmax());
 }
 
 } // close extern "C"

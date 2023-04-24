@@ -101,13 +101,30 @@ public:
     updateEz();
   }
 
+  // (xmin, ymin) : lower left corner (0, h - 1)
+  // (xmax, ymax) : upper right corner (w - 1, 0)
   void rasterizeEz(uint32_t* imgdata, 
                    int w, 
-                   int h) const
+                   int h,
+                   double ezmin,
+                   double ezmax,
+                   double xmin,
+                   double xmax,
+                   double ymin,
+                   double ymax) const
   {
+    if (imgdata == nullptr) return;
+    if (ezmin >= ezmax) return;
+
     // TODO: render the Ez field to pixel data using bilinear interpolation
     // (a viewport is rendered onto the image; not necessary to rasterize the full field; zoom in possible)
     // default is full xrange onto 0..w-1, full yrange onto 0..h-1 but reversed so that pos. axis is upwards
+    for (int i = 0; i < w; i++) {
+      for (int j = 0; j < h; j++) {
+        imgdata[i + j * w] = rgb_viridis((i + j) % 255);
+      }
+    }
+
   }
 
   double minimumEz() const {
