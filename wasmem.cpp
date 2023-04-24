@@ -38,6 +38,11 @@ void takeOneTimestep(void) {
 }
 
 EMSCRIPTEN_KEEPALIVE
+void resetSolver(void) {
+  sim.reset();
+}
+
+EMSCRIPTEN_KEEPALIVE
 double getDelta(void) {
   return sim.getDelta();
 }

@@ -24,8 +24,12 @@ public:
       ygrid[iy] = ymin + iy * delta;
     }
 
-    zeroField();
     setUniformMedium(1.0, 1.0);
+    reset();
+  }
+
+  void reset() {
+    zeroField();
     resetUpdateCount();
   }
 

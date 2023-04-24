@@ -14,6 +14,9 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
 .then((results) =>
 {
     var initSolver = results.instance.exports.initSolver;
+    var resetSolver = results.instance.exports.resetSolver;
+    var takeOneTimestep = results.instance.exports.takeOneTimestep;
+
     var simulatorAddress = results.instance.exports.simulatorAddress;
     var simulatorBytesize = results.instance.exports.simulatorBytesize;
 
@@ -24,7 +27,6 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
     var getCourant = results.instance.exports.getCourant;
     var getDelta = results.instance.exports.getDelta;
     var getTimestep = results.instance.exports.getTimestep;
-    var takeOneTimestep = results.instance.exports.takeOneTimestep;
     var minimumEz = results.instance.exports.minimumEz;
     var maximumEz = results.instance.exports.maximumEz;
 
@@ -32,14 +34,13 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
     var renderDataBufferTestPattern = results.instance.exports.renderDataBufferTestPattern;
     var renderDataBufferEz = results.instance.exports.renderDataBufferEz;
 
-    var showTestPattern = true;
+    var showTestPattern = false;
+    var pauseUpdater = false;
     
     function keyDownEvent(e)
     {
         var code = e.keyCode;
         var key = e.key;
-
-        // Debug logging
 
         if (key == 'd' || key == 'D') {
             console.log([minimumEz(), maximumEz()]);
@@ -55,6 +56,14 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
 
         if (key == 'z' || key == 'Z') {
             showTestPattern = !showTestPattern;
+        }
+
+        if (key == 'p' || key == 'P') {
+            pauseUpdater = !pauseUpdater;
+        }
+
+        if (key == 'r' || key == 'R') {
+            resetSolver();
         }
     }
 
@@ -139,6 +148,8 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
         ctx.fillText('clk. time =  ' + time.toFixed(3) + ' [s]', 10.0, 20.0);
         ctx.fillText('sim. time =  ' + (simTime * 1.0e9).toFixed(3) + ' [ns]', 10.0, 40.0);
         ctx.fillText('    <fps> = ' + (numFrames / time).toFixed(1) + ' [1/s]', 10.0, 60.0);
+
+        if (pauseUpdater) return;
 
         takeOneTimestep();
         simTime += getTimestep();

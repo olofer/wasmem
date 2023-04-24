@@ -15,12 +15,12 @@ Clone repo. Run `./build.sh` and then `./run-html.sh` (or e.g. `./run-html.sh ws
 Blah.
 
 ## TODO
-- enable correct boundary conditions: periodic, reflective, and eventually PML
+- periodic, PEC, PMC, and ABC boundaries
 - evaluate/visualize total EM field energy density
-- enable point and line sources with specified frequency and duration
+- enable point and line sources with specified frequency and duration & Ricker wavelet pulse
 - speed up main rasterizer (how?)
 - have a little ruler in the image which shows the scale of the spatial domain
-- keypress for simulation state reset (time=0, cleared fields; but no edits to domain spec)
+- keypress for simulation state reset (time=0, cleared fields; but no edits to domain spec; pause sim)
 
 ## References
 - https://en.wikipedia.org/wiki/Finite-difference_time-domain_method
