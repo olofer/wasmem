@@ -119,8 +119,8 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
     const ctx = canvas.getContext('2d');
     
     var startTime = Date.now();
-    var delta = 0;
-    const dt = 0.001;
+    var delta = 0.0;
+    //const dt = 0.001;
     var time = 0.0;
     var simTime = 0.0;
     var numFrames = 0;
@@ -135,11 +135,13 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
 
         var elapsedTimeSeconds = elapsedTime * 1.0e-3;
         delta += elapsedTimeSeconds;
+        time += delta;
+        delta = 0.0;
 
-        while (delta >= 0.0) {
-            delta -= dt;
-            time += dt;
-        }
+        //while (delta >= 0.0) {
+        //    delta -= dt;
+        //    time += dt;
+        //}
 
         if (showTestPattern) {
             renderDataBufferTestPattern(dataArray.byteOffset, width, height);
@@ -151,8 +153,8 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
 
         ctx.fillStyle = 'rgb(255, 255, 255)';
         ctx.font = '18px Arial bold';
-        ctx.fillText('clk. time =  ' + time.toFixed(3) + ' [s]', 10.0, 20.0);
-        ctx.fillText('sim. time =  ' + (simTime * 1.0e9).toFixed(3) + ' [ns]', 10.0, 40.0);
+        ctx.fillText('sim. time =  ' + (simTime * 1.0e9).toFixed(3) + ' [ns]', 10.0, 20.0);
+        ctx.fillText('wall time =  ' + time.toFixed(3) + ' [s]', 10.0, 40.0);
         ctx.fillText('    <fps> = ' + (numFrames / time).toFixed(1) + ' [1/s]', 10.0, 60.0);
 
         if (pauseUpdater) return;
