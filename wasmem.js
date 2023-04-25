@@ -35,7 +35,8 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
     var maximumEz = results.instance.exports.maximumEz;
 
     var sourceMove = results.instance.exports.sourceMove;
-    var sourceTune = results.instance.exports.sourceTune;
+    var sourceTuneSet = results.instance.exports.sourceTuneSet;
+    var sourceTuneGet = results.instance.exports.sourceTuneGet;
     var sourceNone = results.instance.exports.sourceNone;
     var sourceMono = results.instance.exports.sourceMono;
     var sourceRicker = results.instance.exports.sourceRicker;
@@ -51,6 +52,10 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
 
     var showTestPattern = false;
     var pauseUpdater = false;
+
+    var useSourceColorValue = true;
+    var minColorValue = 0.0;
+    var maxColorValue = 0.0;
     
     function keyDownEvent(e)
     {
@@ -74,11 +79,11 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
         }
 
         if (key == '+') {
-            sourceTune(-dppw);
+            sourceTuneSet(-dppw);
         }
 
         if (key == '-') {
-            sourceTune(dppw);
+            sourceTuneSet(dppw);
         }
 
         if (key == '0') {
@@ -93,8 +98,14 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
             sourceRicker();
         }
 
-        if (key == 'd' || key == 'D') {
-            console.log([minimumEz(), maximumEz()]);
+        if (key == 'c' || key == 'C') {
+            useSourceColorValue = !useSourceColorValue;
+            if (!useSourceColorValue) {
+                minColorValue = minimumEz();
+                maxColorValue = maximumEz();
+                console.log(['cmin = ' + minColorValue]);
+                console.log(['cmax = ' + maxColorValue]);
+            }
         }
 
         if (key == 't' || key == 'T') {
@@ -129,6 +140,10 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
         if (key == 'y' || key == 'Y') {
             setPeriodicY(!getPeriodicY());
             console.log('periodic in Y = ' + getPeriodicY());
+        }
+
+        if (key == 'f' || key == 'F') {
+            // FIXME: implement field filter pass (removes sharpness)
         }
     }
 
@@ -173,7 +188,9 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
     console.log('Courant factor = ' + getCourant());
     console.log('vacuum impendance = ' + getEta0());
     console.log('vacuum velocity = ' + getVel0());
-    console.log([minimumEz(), maximumEz()]);
+
+    const domainWidth = getDelta() * getNX();
+    const domainHeight = getDelta() * getNY();
 
     const ctx = canvas.getContext('2d');
     
@@ -203,19 +220,31 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
         //}
 
         if (showTestPattern) {
-            renderDataBufferTestPattern(dataArray.byteOffset, width, height);
+            renderDataBufferTestPattern(dataArray.byteOffset, 
+                                        width, 
+                                        height);
         } else {
-            renderDataBufferEz(dataArray.byteOffset, width, height);
+            renderDataBufferEz(dataArray.byteOffset, 
+                               width, 
+                               height, 
+                               useSourceColorValue, 
+                               minColorValue, 
+                               maxColorValue);
         }
         ctx.putImageData(img, 0, 0);
         numFrames += 1;
 
         ctx.fillStyle = 'rgb(255, 255, 255)';
-        ctx.font = '18px Arial bold';
-        ctx.fillText('sim. time =  ' + (simTime * 1.0e9).toFixed(3) + ' [ns]', 10.0, 20.0);
-        ctx.fillText('wall time =  ' + time.toFixed(3) + ' [s]', 10.0, 40.0);
-        ctx.fillText('    <fps> = ' + (numFrames / time).toFixed(1) + ' [1/s]', 10.0, 60.0);
-        ctx.fillText('peri. x,y = ' + getPeriodicX() + ',' + getPeriodicY(), 10.0, 80.0);
+        ctx.font = '16px Courier New';
+        ctx.fillText('sim. time = ' + (simTime * 1.0e9).toFixed(3) + ' [ns]', 10.0, 20.0);
+        ctx.fillText('wall time = ' + time.toFixed(3) + ' [s], <fps> = ' + (numFrames / time).toFixed(1), 10.0, 40.0);
+
+        const sourcePPW = sourceTuneGet()
+        const sourceLambda = sourcePPW * getDelta();
+        ctx.fillText('src wavelength = ' + (sourceLambda * 100.0).toFixed(3) + ' [cm] (' + sourcePPW.toFixed(1) + ' ppw)', 10.0, 60.0);
+        
+        ctx.fillText('periodic x,y = ' + getPeriodicX() + ',' + getPeriodicY(), 10.0, 670.0);
+        ctx.fillText('xdim, ydim   = ' + (domainWidth * 100.0).toFixed(1) + ', ' + (domainHeight * 100.0).toFixed(1) + ' [cm]', 10.0, 690.0);
 
         if (pauseUpdater) return;
 

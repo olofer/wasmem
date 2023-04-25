@@ -70,8 +70,13 @@ void sourceMove(double dx,
 }
 
 EMSCRIPTEN_KEEPALIVE
-void sourceTune(double dppw) {
+void sourceTuneSet(double dppw) {
   sim.sourceTune(dppw);
+}
+
+EMSCRIPTEN_KEEPALIVE
+double sourceTuneGet(void) {
+  return sim.sourceTune();
 }
 
 EMSCRIPTEN_KEEPALIVE
@@ -161,14 +166,24 @@ void renderDataBufferTestPattern(int offset,
 EMSCRIPTEN_KEEPALIVE
 void renderDataBufferEz(int offset, 
                         int w, 
-                        int h)
+                        int h,
+                        bool useSourceAmp,
+                        double cmin,
+                        double cmax)
 {
+  if (useSourceAmp || cmin >= cmax) {
+    const double srcamp = std::fabs(sim.sourceAmplitude());
+    cmin = -1.0 * srcamp;
+    cmax = srcamp;
+  }
+
   uint32_t* data = reinterpret_cast<uint32_t*>(offset);
+
   sim.rasterizeEz(data, 
                   w, 
                   h, 
-                  -1.0, 
-                  1.0, 
+                  cmin, 
+                  cmax, 
                   sim.getXmin(), 
                   sim.getXmax() - 1.0e-8 * getDelta(),
                   sim.getYmin(),

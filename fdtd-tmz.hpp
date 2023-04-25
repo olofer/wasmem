@@ -262,6 +262,10 @@ public:
     source.y += dy;
   }
 
+  double sourceTune() const {
+    return source.ppw;
+  }
+
   void sourceTune(double dppw) {
     source.ppw += dppw;
     if (source.ppw < 2.0) source.ppw = 2.0;
@@ -269,6 +273,14 @@ public:
 
   void sourceType(fdtdSourceType s) {
     source.type = s;
+  }
+
+  double sourceAmplitude() const {
+    return source.amp;
+  }
+
+  double sourceAmplitude(double a) {
+    source.amp = a;
   }
 
 private:
