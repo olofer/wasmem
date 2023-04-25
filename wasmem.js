@@ -1,5 +1,3 @@
-// Minimal example of using C++/WASM to write into a JS canvas image buffer
-
 // Each unit is 16kb; so 512 such units should well cover 1200*700*4 bytes of image data
 const memSize = 512;
 const memory = new WebAssembly.Memory( { initial: memSize, maximum: memSize } );
@@ -40,6 +38,7 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
     var sourceNone = results.instance.exports.sourceNone;
     var sourceMono = results.instance.exports.sourceMono;
     var sourceRicker = results.instance.exports.sourceRicker;
+    var sourceSquare = results.instance.exports.sourceSquare;
 
     var fieldEnergyEz = results.instance.exports.fieldEnergyEz;
 
@@ -96,6 +95,10 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
 
         if (key == '2') {
             sourceRicker();
+        }
+
+        if (key == '3') {
+            sourceSquare();
         }
 
         if (key == 'c' || key == 'C') {
@@ -242,7 +245,7 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
         const sourcePPW = sourceTuneGet()
         const sourceLambda = sourcePPW * getDelta();
         ctx.fillText('src wavelength = ' + (sourceLambda * 100.0).toFixed(3) + ' [cm] (' + sourcePPW.toFixed(1) + ' ppw)', 10.0, 60.0);
-        
+
         ctx.fillText('periodic x,y = ' + getPeriodicX() + ',' + getPeriodicY(), 10.0, 670.0);
         ctx.fillText('xdim, ydim   = ' + (domainWidth * 100.0).toFixed(1) + ', ' + (domainHeight * 100.0).toFixed(1) + ' [cm]', 10.0, 690.0);
 

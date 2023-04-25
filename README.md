@@ -10,12 +10,16 @@ Run two-dimensional finite-difference time-domain electromagnetic simulations di
 - `Y` toggle periodic boundary in y (vertical) direction
 - `Z` toggle test rasterizer screen (see full colormap)
 - `C` set color range to current field range, or go back to source range
-- (WIP) `F` run a low-pass filter across the E-field once 
+- (WIP) `S` toggle medium conductivity (damping effect) 
 - `+/-` change source frequency (i.e. points per wavelength)
 - `up/down` and `left/right` move source location
 - `0` turn off source (no source)
 - `1` sinusoidal continuous source
 - `2` pulsed Ricker wavelet source
+- `3` square wave source
+
+WIP: implementation of absorbing boundary
+WIP: more sources, axis aligned lines? (and option to add or set source)
 
 ### Web
 Click this link: (TBA)
@@ -28,7 +32,6 @@ Blah.
 
 ## TODO
 - ABC boundaries (dynamically selectable PEC, Periodic, or basic ABC)
-- line source options? axis aligned at least.. sources should add not hardwire ?!
 - evaluate/visualize total EM field energy density; or at least Hx, Hy
 - speed up main rasterizer (how? floats?!)
 

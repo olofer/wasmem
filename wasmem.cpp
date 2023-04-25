@@ -95,6 +95,11 @@ void sourceRicker(void) {
 }
 
 EMSCRIPTEN_KEEPALIVE
+void sourceSquare(void) {
+  sim.sourceType(TMz::fdtdSourceType::SquareWave);
+}
+
+EMSCRIPTEN_KEEPALIVE
 double fieldEnergyEz(void) {
   return sim.energyE();
 }
