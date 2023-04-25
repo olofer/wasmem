@@ -119,7 +119,8 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
     const dataPtr = initDataBuffer(dataArray.byteOffset, width, height);
     console.log('img data ptr = ' + dataPtr);
 
-    initSolver(-1.0, -1.0, 0.01);
+    const dx = 1.0e-3; // 1mm per point
+    initSolver(-1.0 * dx * getNX() / 2.0, -1.0 * dx * getNY() / 2.0, dx); // place (0,0) at center of grid 
 
     console.log('NX = ' + getNX());
     console.log('NY = ' + getNY());

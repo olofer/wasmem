@@ -8,6 +8,30 @@ const double vacuum_impedance = std::sqrt(vacuum_permeability / vacuum_permittiv
 const double vacuum_velocity = 1.0 / std::sqrt(vacuum_permeability * vacuum_permittivity);
 const double courant_factor = 1.0 / std::sqrt(2.0);
 
+enum fdtdSourceType {
+  NoSource = 0,
+  Monochromatic = 1,
+  RickerPulse = 2,
+};
+
+struct fdtdSource {
+  fdtdSourceType type;
+  double ppw;
+  double x;
+  double y;
+  double amp;
+
+  void initDefault() {
+    type = fdtdSourceType::Monochromatic;
+    ppw = 30.0;
+    x = 0.05;
+    y = 0.05;
+    amp = 1.0;
+  }
+
+  // FIXME: the source calc should be implemented as a member of this struct also!
+};
+
 template <int NX, int NY>
 class fdtdSolver
 {
@@ -29,6 +53,8 @@ public:
 
     setUniformMedium(1.0, 1.0, 0.0, 0.0);
     reset();
+
+    source.initDefault();
   }
 
   void reset() {
@@ -132,7 +158,7 @@ public:
     updateEz();
     if (periodicAlongX) makeEzPeriodicX();
     if (periodicAlongY) makeEzPeriodicY();
-    updateSource(30.0);
+    applySource();
     updateCounter++;
   }
 
@@ -247,8 +273,18 @@ private:
   bool periodicAlongX;
   bool periodicAlongY;
 
+  fdtdSource source;
+
   int index(int ix, int iy) const {
     return NX * iy + ix;
+  }
+
+  int integerx(double x) const {
+    return (int) std::round((x - getXmin()) / getDelta());
+  }
+
+  int integery(double y) const {
+    return (int) std::round((y - getYmin()) / getDelta());
   }
 
   double interpolateEz(double xhat, 
@@ -351,13 +387,38 @@ private:
     }
   }
 
-  // FIXME 2: harmonic, ricker, none; also source ppw editable
+  void applySource() {
+    if (source.type == fdtdSourceType::NoSource)
+      return;
 
-  void updateSource(double ppw) {
-    const double lambda = getDelta() * ppw;
+    const int ix = integerx(source.x);
+    if (ix < 0 || ix >= NX)
+      return;
+
+    const int iy = integery(source.y);
+    if (iy < 0 || iy >= NY)
+      return;
+
+    switch (source.type)
+    {
+    case fdtdSourceType::Monochromatic:
+      monochromaticSource(ix, iy);
+      break;
+
+    case fdtdSourceType::RickerPulse:
+      // FIXME: implement this source
+      break;
+
+    default:
+      break;
+    }
+  }
+
+  void monochromaticSource(int ix, int iy) {
+    const double lambda = getDelta() * source.ppw;
     const double omega = (2.0 * M_PI) * vacuum_velocity / lambda;
     const double time = updateCounter * getTimestep();
-    Ez[index(3 * NX / 4, NY / 3)] = std::sin(omega * time);
+    Ez[index(ix, iy)] = source.amp * std::sin(omega * time);
   }
 
 };
