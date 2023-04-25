@@ -6,6 +6,8 @@ Run two-dimensional finite-difference time-domain electromagnetic simulations di
 ## Usage
 - `R` reset simulation state (zero fields, reset source)
 - `P` pause/unpause field updater (but not rendering)
+- `X` toggle periodic boundary in x (horizontal) direction
+- `Y` toggle periodic boundary in y (vertical) direction
 - `Z` toggle test rasterizer screen (see full colormap)
 
 ### Web
@@ -20,7 +22,7 @@ Blah.
 ## TODO
 - keypress: 0,1,2,3.. for source type; arrows for moving source, +/- for change of PPW
 - Ricker wavelet pulse: repetition rate; line source
-- periodic, PEC, PMC, and ABC boundaries (dynamically selectable)
+- ABC boundaries (dynamically selectable PEC, Periodic, or basic ABC)
 - evaluate/visualize total EM field energy density; or at least Hx, Hy
 - speed up main rasterizer (how? floats?!)
 - have a little ruler in the image which shows the scale of the spatial domain

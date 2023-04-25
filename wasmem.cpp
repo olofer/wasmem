@@ -43,6 +43,26 @@ void resetSolver(void) {
 }
 
 EMSCRIPTEN_KEEPALIVE
+void setPeriodicX(bool X) {
+  sim.setPeriodicX(X);
+}
+
+EMSCRIPTEN_KEEPALIVE
+bool getPeriodicX() {
+  return sim.isPeriodicX();
+}
+
+EMSCRIPTEN_KEEPALIVE
+void setPeriodicY(bool Y) {
+  sim.setPeriodicY(Y);
+}
+
+EMSCRIPTEN_KEEPALIVE
+bool getPeriodicY() {
+  return sim.isPeriodicY();
+}
+
+EMSCRIPTEN_KEEPALIVE
 double fieldEnergyEz(void) {
   return sim.energyE();
 }

@@ -16,6 +16,10 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
     var initSolver = results.instance.exports.initSolver;
     var resetSolver = results.instance.exports.resetSolver;
     var takeOneTimestep = results.instance.exports.takeOneTimestep;
+    var getPeriodicX = results.instance.exports.getPeriodicX;
+    var setPeriodicX = results.instance.exports.setPeriodicX;
+    var getPeriodicY = results.instance.exports.getPeriodicY;
+    var setPeriodicY = results.instance.exports.setPeriodicY;
 
     var simulatorAddress = results.instance.exports.simulatorAddress;
     var simulatorBytesize = results.instance.exports.simulatorBytesize;
@@ -70,6 +74,16 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
 
         if (key == 'e' || key == 'E') {
             console.log('E-field energy = ' + fieldEnergyEz() + ' [J / m]');
+        }
+
+        if (key == 'x' || key == 'X') {
+            setPeriodicX(!getPeriodicX());
+            console.log('periodic in X = ' + getPeriodicX());
+        }
+
+        if (key == 'y' || key == 'Y') {
+            setPeriodicY(!getPeriodicY());
+            console.log('periodic in Y = ' + getPeriodicY());
         }
     }
 

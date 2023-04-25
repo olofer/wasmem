@@ -24,6 +24,9 @@ public:
       ygrid[iy] = ymin + iy * delta;
     }
 
+    setPeriodicX(true);
+    setPeriodicY(true);
+
     setUniformMedium(1.0, 1.0, 0.0, 0.0);
     reset();
   }
@@ -48,6 +51,9 @@ public:
   double getYmin() const { return ygrid[0]; }
   double getYmax() const { return ygrid[NY - 1]; }
 
+  bool isPeriodicX() const { return periodicAlongX; }
+  bool isPeriodicY() const { return periodicAlongY; }
+
   void zeroField() {
     std::memset(Hx, 0, NX * NY * sizeof(double));
     std::memset(Hy, 0, NX * NY * sizeof(double));
@@ -62,6 +68,8 @@ public:
   {
     relativePermeability = mur; // stash these for energy accounting (TBD)
     relativePermittivity = epr;
+    magneticConductivity = sigmam;
+    electricConductivity = sigma;
 
     const double CH = courant_factor / (mur * vacuum_impedance);
     const double CE = vacuum_impedance * courant_factor / epr;
@@ -118,47 +126,28 @@ public:
     return sum * delta * delta / (2.0 * relativePermeability * vacuum_permeability);
   }
 */
-  void updateHxHy() {
-    for (int ix = 0; ix < NX; ix++) {
-      for (int iy = 0; iy < NY - 1; iy++) {
-        const int idx = index(ix, iy);
-        Hx[idx] = chxh[idx] * Hx[idx] - chxe[idx] * (Ez[index(ix, iy + 1)] - Ez[idx]);
-      }
-    }
-
-    for (int ix = 0; ix < NX - 1; ix++) {
-      for (int iy = 0; iy < NY; iy++) {
-        const int idx = index(ix, iy);
-        Hy[idx] = chyh[idx] * Hy[idx] + chye[idx] * (Ez[index(ix + 1, iy)] - Ez[idx]);
-      }
-    }
-  }
-
-  void updateEz() {
-    for (int ix = 1; ix < NX - 1; ix++) {
-      for (int iy = 1; iy < NY - 1; iy++) {
-        const int idx = index(ix, iy);
-        const double dxhy = Hy[idx] - Hy[index(ix - 1, iy)];
-        const double dyhx = Hx[idx] - Hx[index(ix, iy - 1)];
-        Ez[idx] = ceze[idx] * Ez[idx] + cezh[idx] * (dxhy - dyhx);
-      }
-    }
-  }
-
-  // FIXME 2: harmonic, ricker, none; also source ppw editable
-
-  void updateSource(double ppw) {
-    const double lambda = getDelta() * ppw;
-    const double omega = (2.0 * M_PI) * vacuum_velocity / lambda;
-    const double time = updateCounter * getTimestep();
-    Ez[index(3 * NX / 4, NY / 3)] = std::sin(omega * time);
-  }
-
+  
   void update() {
     updateHxHy();
     updateEz();
+    if (periodicAlongX) makeEzPeriodicX();
+    if (periodicAlongY) makeEzPeriodicY();
     updateSource(30.0);
     updateCounter++;
+  }
+
+  void setPeriodicX(bool onoff) {
+    periodicAlongX = onoff;
+    if (!periodicAlongX) {
+      zeroBoundaryEzX();
+    } 
+  }
+
+  void setPeriodicY(bool onoff) {
+    periodicAlongY = onoff;
+    if (!periodicAlongY) {
+      zeroBoundaryEzY();
+    } 
   }
 
   double minimumEz() const {
@@ -240,6 +229,8 @@ private:
   // uniform medium (set properties)
   double relativePermittivity;
   double relativePermeability;
+  double electricConductivity;
+  double magneticConductivity;
 
   // update coefficient arrays
   double chxh[NX * NY];
@@ -252,6 +243,9 @@ private:
   double cezh[NX * NY];
 
   int updateCounter;
+
+  bool periodicAlongX;
+  bool periodicAlongY;
 
   int index(int ix, int iy) const {
     return NX * iy + ix;
@@ -277,6 +271,95 @@ private:
 
     return w00 * v00 + w01 * v01 + w10 * v10 + w11 * v11;
   }
+
+  void updateHxHy() {
+    for (int ix = 0; ix < NX; ix++) {
+      for (int iy = 0; iy < NY - 1; iy++) {
+        const int idx = index(ix, iy);
+        Hx[idx] = chxh[idx] * Hx[idx] - chxe[idx] * (Ez[index(ix, iy + 1)] - Ez[idx]);
+      }
+    }
+
+    for (int ix = 0; ix < NX - 1; ix++) {
+      for (int iy = 0; iy < NY; iy++) {
+        const int idx = index(ix, iy);
+        Hy[idx] = chyh[idx] * Hy[idx] + chye[idx] * (Ez[index(ix + 1, iy)] - Ez[idx]);
+      }
+    }
+  }
+
+  void updateEz() {
+    for (int ix = 1; ix < NX - 1; ix++) {
+      for (int iy = 1; iy < NY - 1; iy++) {
+        const int idx = index(ix, iy);
+        const double dxhy = Hy[idx] - Hy[index(ix - 1, iy)];
+        const double dyhx = Hx[idx] - Hx[index(ix, iy - 1)];
+        Ez[idx] = ceze[idx] * Ez[idx] + cezh[idx] * (dxhy - dyhx);
+      }
+    }
+  }
+
+  // Hx usage size if (NX, NY - 1)
+  // Hy usage size is (NX - 1, NY)
+  void makeEzPeriodicX() {
+    const int ixmin = 0;
+    for (int iy = 1; iy < NY - 1; iy++) {
+      const int idx = index(ixmin, iy);
+      const double dxhy = Hy[idx] - Hy[index(NX - 2, iy)];
+      const double dyhx = Hx[idx] - Hx[index(ixmin, iy - 1)];
+      Ez[idx] = ceze[idx] * Ez[idx] + cezh[idx] * (dxhy - dyhx);
+    }
+
+    const int ixmax = NX - 1;
+    for (int iy = 1; iy < NY - 1; iy++) {
+      const int idx = index(ixmax, iy);
+      const double dxhy = Hy[index(0, iy)] - Hy[index(ixmax - 1, iy)];
+      const double dyhx = Hx[idx] - Hx[index(ixmax, iy - 1)];
+      Ez[idx] = ceze[idx] * Ez[idx] + cezh[idx] * (dxhy - dyhx);
+    }
+  }
+
+  void zeroBoundaryEzX() {
+    for (int iy = 0; iy < NY; iy++) {
+      Ez[index(0, iy)] = 0.0;
+      Ez[index(NX - 1, iy)] = 0.0;
+    }
+  }
+
+  void makeEzPeriodicY() {
+    const int iymin = 0;
+    for (int ix = 1; ix < NX - 1; ix++) {
+      const int idx = index(ix, iymin);
+      const double dxhy = Hy[idx] - Hy[index(ix - 1, iymin)];
+      const double dyhx = Hx[idx] - Hx[index(ix, NY - 2)];
+      Ez[idx] = ceze[idx] * Ez[idx] + cezh[idx] * (dxhy - dyhx);
+    }
+
+    const int iymax = NY - 1;
+    for (int ix = 1; ix < NX - 1; ix++) {
+      const int idx = index(ix, iymax);
+      const double dxhy = Hy[idx] - Hy[index(ix - 1, iymax)];
+      const double dyhx = Hx[index(ix, 0)] - Hx[index(ix, iymax - 1)];
+      Ez[idx] = ceze[idx] * Ez[idx] + cezh[idx] * (dxhy - dyhx);
+    }
+  }
+
+  void zeroBoundaryEzY() {
+    for (int ix = 0; ix < NX; ix++) {
+      Ez[index(ix, 0)] = 0.0;
+      Ez[index(ix, NY - 1)] = 0.0;
+    }
+  }
+
+  // FIXME 2: harmonic, ricker, none; also source ppw editable
+
+  void updateSource(double ppw) {
+    const double lambda = getDelta() * ppw;
+    const double omega = (2.0 * M_PI) * vacuum_velocity / lambda;
+    const double time = updateCounter * getTimestep();
+    Ez[index(3 * NX / 4, NY / 3)] = std::sin(omega * time);
+  }
+
 };
 
 }
