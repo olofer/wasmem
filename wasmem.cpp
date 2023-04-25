@@ -63,6 +63,33 @@ bool getPeriodicY() {
 }
 
 EMSCRIPTEN_KEEPALIVE
+void sourceMove(double dx, 
+                double dy)
+{
+  sim.sourceMove(dx, dy);
+}
+
+EMSCRIPTEN_KEEPALIVE
+void sourceTune(double dppw) {
+  sim.sourceTune(dppw);
+}
+
+EMSCRIPTEN_KEEPALIVE
+void sourceNone(void) {
+  sim.sourceType(TMz::fdtdSourceType::NoSource);
+}
+
+EMSCRIPTEN_KEEPALIVE
+void sourceMono(void) {
+  sim.sourceType(TMz::fdtdSourceType::Monochromatic);
+}
+
+EMSCRIPTEN_KEEPALIVE
+void sourceRicker(void) {
+  sim.sourceType(TMz::fdtdSourceType::RickerPulse);
+}
+
+EMSCRIPTEN_KEEPALIVE
 double fieldEnergyEz(void) {
   return sim.energyE();
 }

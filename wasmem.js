@@ -34,11 +34,20 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
     var minimumEz = results.instance.exports.minimumEz;
     var maximumEz = results.instance.exports.maximumEz;
 
+    var sourceMove = results.instance.exports.sourceMove;
+    var sourceTune = results.instance.exports.sourceTune;
+    var sourceNone = results.instance.exports.sourceNone;
+    var sourceMono = results.instance.exports.sourceMono;
+    var sourceRicker = results.instance.exports.sourceRicker;
+
     var fieldEnergyEz = results.instance.exports.fieldEnergyEz;
 
     var initDataBuffer = results.instance.exports.initDataBuffer;
     var renderDataBufferTestPattern = results.instance.exports.renderDataBufferTestPattern;
     var renderDataBufferEz = results.instance.exports.renderDataBufferEz;
+
+    const dx = 1.0e-3; // 1mm per point
+    const dppw = 1.0;
 
     var showTestPattern = false;
     var pauseUpdater = false;
@@ -47,6 +56,42 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
     {
         var code = e.keyCode;
         var key = e.key;
+
+        if (code == 39) {  // right
+            sourceMove(dx, 0.0);
+        }
+
+        if (code == 37) {  // left
+            sourceMove(-dx, 0.0);
+        }
+
+        if (code == 38) {  // up
+            sourceMove(0.0, dx);
+        }
+    
+        if (code == 40) {  // down
+            sourceMove(0.0, -dx);
+        }
+
+        if (key == '+') {
+            sourceTune(-dppw);
+        }
+
+        if (key == '-') {
+            sourceTune(dppw);
+        }
+
+        if (key == '0') {
+            sourceNone();
+        }
+
+        if (key == '1') {
+            sourceMono();
+        }
+
+        if (key == '2') {
+            sourceRicker();
+        }
 
         if (key == 'd' || key == 'D') {
             console.log([minimumEz(), maximumEz()]);
@@ -119,7 +164,6 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
     const dataPtr = initDataBuffer(dataArray.byteOffset, width, height);
     console.log('img data ptr = ' + dataPtr);
 
-    const dx = 1.0e-3; // 1mm per point
     initSolver(-1.0 * dx * getNX() / 2.0, -1.0 * dx * getNY() / 2.0, dx); // place (0,0) at center of grid 
 
     console.log('NX = ' + getNX());
@@ -171,6 +215,7 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
         ctx.fillText('sim. time =  ' + (simTime * 1.0e9).toFixed(3) + ' [ns]', 10.0, 20.0);
         ctx.fillText('wall time =  ' + time.toFixed(3) + ' [s]', 10.0, 40.0);
         ctx.fillText('    <fps> = ' + (numFrames / time).toFixed(1) + ' [1/s]', 10.0, 60.0);
+        ctx.fillText('peri. x,y = ' + getPeriodicX() + ',' + getPeriodicY(), 10.0, 80.0);
 
         if (pauseUpdater) return;
 

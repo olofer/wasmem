@@ -9,6 +9,11 @@ Run two-dimensional finite-difference time-domain electromagnetic simulations di
 - `X` toggle periodic boundary in x (horizontal) direction
 - `Y` toggle periodic boundary in y (vertical) direction
 - `Z` toggle test rasterizer screen (see full colormap)
+- `+/-` change source frequency (i.e. points per wavelength)
+- `up/down` and `left/right` move source location
+- `0` turn off source (no source)
+- `1` sinusoidal continuous source
+- `2` pulsed Ricker wavelet source  
 
 ### Web
 Click this link: (TBA)
@@ -20,12 +25,12 @@ Clone repo. Run `./build.sh` and then `./run-html.sh` (or e.g. `./run-html.sh ws
 Blah.
 
 ## TODO
-- keypress: 0,1,2,3.. for source type; arrows for moving source, +/- for change of PPW
-- Ricker wavelet pulse: repetition rate; line source
 - ABC boundaries (dynamically selectable PEC, Periodic, or basic ABC)
+- show scale of domain; and show source wavelength in units
+- line source ?
 - evaluate/visualize total EM field energy density; or at least Hx, Hy
 - speed up main rasterizer (how? floats?!)
-- have a little ruler in the image which shows the scale of the spatial domain
+- option to (re-)auto-range colorscale
 
 ## References
 - https://en.wikipedia.org/wiki/Finite-difference_time-domain_method

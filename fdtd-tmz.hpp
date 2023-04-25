@@ -9,9 +9,10 @@ const double vacuum_velocity = 1.0 / std::sqrt(vacuum_permeability * vacuum_perm
 const double courant_factor = 1.0 / std::sqrt(2.0);
 
 enum fdtdSourceType {
-  NoSource = 0,
-  Monochromatic = 1,
-  RickerPulse = 2,
+  NoSource,
+  Monochromatic,
+  RickerPulse,
+  SquareWave,
 };
 
 struct fdtdSource {
@@ -20,6 +21,7 @@ struct fdtdSource {
   double x;
   double y;
   double amp;
+  double delayMultiplier;
 
   void initDefault() {
     type = fdtdSourceType::Monochromatic;
@@ -27,9 +29,24 @@ struct fdtdSource {
     x = 0.05;
     y = 0.05;
     amp = 1.0;
+    delayMultiplier = 2.0;
   }
 
-  // FIXME: the source calc should be implemented as a member of this struct also!
+  double sinusoidal(double q) const {
+    return amp * std::sin(2.0 * M_PI * courant_factor * q / ppw);
+  }
+
+  double ricker(int q) const {
+    const int qd = static_cast<int>(delayMultiplier * ppw / courant_factor);
+    const int qeff = q % (2 * qd);
+    const double eta = M_PI * courant_factor * (qeff - qd) / ppw;
+    return amp * std::exp(-1.0 * eta * eta) * (1.0 - 2.0 * eta * eta);
+  }
+
+  void off() {
+    type = fdtdSourceType::NoSource;
+  }
+
 };
 
 template <int NX, int NY>
@@ -240,6 +257,20 @@ public:
     }
   }
 
+  void sourceMove(double dx, double dy) {
+    source.x += dx;
+    source.y += dy;
+  }
+
+  void sourceTune(double dppw) {
+    source.ppw += dppw;
+    if (source.ppw < 2.0) source.ppw = 2.0;
+  }
+
+  void sourceType(fdtdSourceType s) {
+    source.type = s;
+  }
+
 private:
   double xgrid[NX];
   double ygrid[NY];
@@ -388,9 +419,6 @@ private:
   }
 
   void applySource() {
-    if (source.type == fdtdSourceType::NoSource)
-      return;
-
     const int ix = integerx(source.x);
     if (ix < 0 || ix >= NX)
       return;
@@ -402,23 +430,20 @@ private:
     switch (source.type)
     {
     case fdtdSourceType::Monochromatic:
-      monochromaticSource(ix, iy);
+      Ez[index(ix, iy)] = source.sinusoidal(static_cast<double>(updateCounter));
       break;
 
     case fdtdSourceType::RickerPulse:
-      // FIXME: implement this source
+      Ez[index(ix, iy)] = source.ricker(updateCounter);
       break;
 
-    default:
+    case fdtdSourceType::SquareWave:
+      Ez[index(ix, iy)] = (source.sinusoidal(static_cast<double>(updateCounter)) < 0.0 ? -source.amp : source.amp);
+      break;
+
+    case fdtdSourceType::NoSource:
       break;
     }
-  }
-
-  void monochromaticSource(int ix, int iy) {
-    const double lambda = getDelta() * source.ppw;
-    const double omega = (2.0 * M_PI) * vacuum_velocity / lambda;
-    const double time = updateCounter * getTimestep();
-    Ez[index(ix, iy)] = source.amp * std::sin(omega * time);
   }
 
 };
