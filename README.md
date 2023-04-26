@@ -20,6 +20,8 @@ Run directly in browser: https://raw.githack.com/olofer/wasmem/main/payload/inde
 - `2` pulsed Ricker wavelet source
 - `3` square wave source
 
+The source location can be placed directly at the cursor with a mouse click.
+
 ### Local build & run
 Clone repo. Run `./build.sh` and then `./run-html.sh` (or e.g. `./run-html.sh wsl-edge` to select another browser, assuming WSL2 environment).
 

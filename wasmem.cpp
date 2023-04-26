@@ -85,6 +85,13 @@ void sourceMove(double dx,
 }
 
 EMSCRIPTEN_KEEPALIVE
+void sourcePlace(double x, 
+                 double y)
+{
+  sim.sourcePlace(x, y);
+}
+
+EMSCRIPTEN_KEEPALIVE
 void sourceTuneSet(double dppw) {
   sim.sourceTune(dppw);
 }

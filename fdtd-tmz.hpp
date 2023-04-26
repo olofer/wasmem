@@ -288,9 +288,18 @@ public:
     }
   }
 
-  void sourceMove(double dx, double dy) {
+  void sourceMove(double dx, 
+                  double dy)
+  {
     source.x += dx;
     source.y += dy;
+  }
+
+  void sourcePlace(double x, 
+                   double y)
+  {
+    source.x = x;
+    source.y = y;
   }
 
   double sourceTune() const {

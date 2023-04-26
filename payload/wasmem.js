@@ -37,6 +37,7 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
     var maximumEz = results.instance.exports.maximumEz;
 
     var sourceMove = results.instance.exports.sourceMove;
+    var sourcePlace = results.instance.exports.sourcePlace;
     var sourceTuneSet = results.instance.exports.sourceTuneSet;
     var sourceTuneGet = results.instance.exports.sourceTuneGet;
     var sourceNone = results.instance.exports.sourceNone;
@@ -192,7 +193,10 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
     const dataPtr = initDataBuffer(dataArray.byteOffset, width, height);
     console.log('img data ptr = ' + dataPtr);
 
-    initSolver(-1.0 * dx * getNX() / 2.0, -1.0 * dx * getNY() / 2.0, dx); // place (0,0) at center of grid 
+    const xmin = -1.0 * dx * getNX() / 2.0;
+    const ymin = -1.0 * dx * getNY() / 2.0;
+
+    initSolver(xmin, ymin, dx); // place (0,0) at center of grid 
 
     console.log('NX = ' + getNX());
     console.log('NY = ' + getNY());
@@ -210,10 +214,9 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
     
     var startTime = Date.now();
     var delta = 0.0;
-    //const dt = 0.001;
     var time = 0.0;
     var simTime = 0.0;
-    var numFrames = 0;
+    
     const betaFPSfilter = 1.0 / 100.0;
     var filteredFPS = 0.0;
    
@@ -229,11 +232,6 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
         delta += elapsedTimeSeconds;
         time += delta;
         delta = 0.0;
-
-        //while (delta >= 0.0) {
-        //    delta -= dt;
-        //    time += dt;
-        //}
 
         if (elapsedTimeSeconds > 0.0 && elapsedTimeSeconds < 1.0)
             filteredFPS = (betaFPSfilter) * (1.0 / elapsedTimeSeconds) + (1.0 - betaFPSfilter) * filteredFPS; 
@@ -251,7 +249,6 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
                                maxColorValue);
         }
         ctx.putImageData(img, 0, 0);
-        numFrames += 1;
 
         ctx.fillStyle = 'rgb(255, 255, 255)';
         ctx.font = '16px Courier New';
@@ -273,9 +270,21 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
         takeOneTimestep();
         simTime += getTimestep();
     }
-    
+
     window.addEventListener('keydown', keyDownEvent);
     window.addEventListener('keyup', keyUpEvent);
+
+    function handleMouseDown(event) {
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = event.clientX - rect.left;
+        const mouseY = event.clientY - rect.top;
+        //console.log('Mouse clicked at:', mouseX, mouseY);
+        const newX = xmin + (mouseX / width) * domainWidth;
+        const newY = domainHeight / 2.0 - (mouseY / height) * domainHeight;
+        sourcePlace(newX, newY); 
+    }
+
+    canvas.addEventListener('mousedown', handleMouseDown);
 
     window.requestAnimationFrame(main); 
 
