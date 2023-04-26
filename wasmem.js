@@ -203,6 +203,8 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
     var time = 0.0;
     var simTime = 0.0;
     var numFrames = 0;
+    const betaFPSfilter = 1.0 / 100.0;
+    var filteredFPS = 0.0;
    
     function main()
     {
@@ -222,6 +224,9 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
         //    time += dt;
         //}
 
+        if (elapsedTimeSeconds > 0.0 && elapsedTimeSeconds < 1.0)
+            filteredFPS = (betaFPSfilter) * (1.0 / elapsedTimeSeconds) + (1.0 - betaFPSfilter) * filteredFPS; 
+
         if (showTestPattern) {
             renderDataBufferTestPattern(dataArray.byteOffset, 
                                         width, 
@@ -240,7 +245,7 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
         ctx.fillStyle = 'rgb(255, 255, 255)';
         ctx.font = '16px Courier New';
         ctx.fillText('sim. time = ' + (simTime * 1.0e9).toFixed(3) + ' [ns]', 10.0, 20.0);
-        ctx.fillText('wall time = ' + time.toFixed(3) + ' [s], <fps> = ' + (numFrames / time).toFixed(1), 10.0, 40.0);
+        ctx.fillText('wall time = ' + time.toFixed(3) + ' [s], <fps> = ' + filteredFPS.toFixed(1), 10.0, 40.0);
 
         const sourcePPW = sourceTuneGet()
         const sourceLambda = sourcePPW * getDelta();

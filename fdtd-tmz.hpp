@@ -17,6 +17,8 @@ enum fdtdSourceType {
 
 struct fdtdSource {
   fdtdSourceType type;
+  bool additive;
+
   double ppw;
   double x;
   double y;
@@ -25,6 +27,7 @@ struct fdtdSource {
 
   void initDefault() {
     type = fdtdSourceType::Monochromatic;
+    additive = false;
     ppw = 30.0;
     x = 0.05;
     y = 0.05;
@@ -439,22 +442,30 @@ private:
     if (iy < 0 || iy >= NY)
       return;
 
+    double Sxy = 0.0;
+
     switch (source.type)
     {
     case fdtdSourceType::Monochromatic:
-      Ez[index(ix, iy)] = source.sinusoidal(static_cast<double>(updateCounter));
+      Sxy = source.sinusoidal(static_cast<double>(updateCounter));
       break;
 
     case fdtdSourceType::RickerPulse:
-      Ez[index(ix, iy)] = source.ricker(updateCounter);
+      Sxy = source.ricker(updateCounter);
       break;
 
     case fdtdSourceType::SquareWave:
-      Ez[index(ix, iy)] = (source.sinusoidal(static_cast<double>(updateCounter)) < 0.0 ? -source.amp : source.amp);
+      Sxy = (source.sinusoidal(static_cast<double>(updateCounter)) < 0.0 ? -source.amp : source.amp);
       break;
 
     case fdtdSourceType::NoSource:
-      break;
+      return;
+    }
+
+    if (source.additive) {
+      Ez[index(ix, iy)] += Sxy;
+    } else {
+      Ez[index(ix, iy)] = Sxy;
     }
   }
 

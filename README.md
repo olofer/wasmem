@@ -3,6 +3,8 @@
 ## Summary
 Run two-dimensional finite-difference time-domain electromagnetic simulations directly in the browser. Interact with the simulation using keyboard and mouse actions. The simulation is written in `C++`, compiled to `WASM`, and the application is orchestrated in `JS`.
 
+Run directly in browser: (TBA)
+
 ## Usage
 - `R` reset simulation state (zero fields, reset source)
 - `P` pause/unpause field updater (but not rendering)
@@ -18,22 +20,14 @@ Run two-dimensional finite-difference time-domain electromagnetic simulations di
 - `2` pulsed Ricker wavelet source
 - `3` square wave source
 
-WIP: implementation of absorbing boundary
-WIP: more sources, axis aligned lines? (and option to add or set source)
-
-### Web
-Click this link: (TBA)
-
-### Locally
+### Local build & run
 Clone repo. Run `./build.sh` and then `./run-html.sh` (or e.g. `./run-html.sh wsl-edge` to select another browser, assuming WSL2 environment).
 
-### User guide
-Blah.
-
 ## TODO
-- ABC boundaries (dynamically selectable PEC, Periodic, or basic ABC)
-- evaluate/visualize total EM field energy density; or at least Hx, Hy
-- speed up main rasterizer (how? floats?!)
+- [ ] ABC boundaries (dynamically selectable PEC, Periodic, or basic ABC)
+- [ ] evaluate/visualize total EM field energy density; or at least Hx, Hy
+- [ ] speed up main rasterizer (how? floats?!)
+- [ ] more sources, axis aligned lines? (and option to add or set source)
 
 ## References
 - https://en.wikipedia.org/wiki/Finite-difference_time-domain_method
