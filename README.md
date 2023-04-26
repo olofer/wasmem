@@ -3,7 +3,7 @@
 ## Summary
 Run two-dimensional finite-difference time-domain electromagnetic simulations directly in the browser. Interact with the simulation using keyboard and mouse actions. The simulation is written in `C++`, compiled to `WASM`, and the application is orchestrated in `JS`.
 
-Run directly in browser: (TBA)
+Run directly in browser: https://raw.githack.com/olofer/wasmem/main/payload/index.html
 
 ## Usage
 - `R` reset simulation state (zero fields, reset source)
@@ -24,7 +24,7 @@ Run directly in browser: (TBA)
 Clone repo. Run `./build.sh` and then `./run-html.sh` (or e.g. `./run-html.sh wsl-edge` to select another browser, assuming WSL2 environment).
 
 ## TODO
-- [ ] ABC boundaries (dynamically selectable PEC, Periodic, or basic ABC)
+- [ ] support for absorbing boundaries
 - [ ] evaluate/visualize total EM field energy density; or at least Hx, Hy
 - [ ] speed up main rasterizer (how? floats?!)
 - [ ] more sources, axis aligned lines? (and option to add or set source)
