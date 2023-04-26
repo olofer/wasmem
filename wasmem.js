@@ -19,6 +19,10 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
     var getPeriodicY = results.instance.exports.getPeriodicY;
     var setPeriodicY = results.instance.exports.setPeriodicY;
 
+    var setVacuum = results.instance.exports.setVacuum;
+    var isVacuum = results.instance.exports.isVacuum;
+    var setDamping = results.instance.exports.setDamping;
+
     var simulatorAddress = results.instance.exports.simulatorAddress;
     var simulatorBytesize = results.instance.exports.simulatorBytesize;
 
@@ -48,6 +52,8 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
 
     const dx = 1.0e-3; // 1mm per point
     const dppw = 1.0;
+
+    const skinLength = 10.0; // points per skinlength (if damped medium)
 
     var showTestPattern = false;
     var pauseUpdater = false;
@@ -145,8 +151,12 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
             console.log('periodic in Y = ' + getPeriodicY());
         }
 
-        if (key == 'f' || key == 'F') {
-            // FIXME: implement field filter pass (removes sharpness)
+        if (key == 'd' || key == 'D') {
+            if (isVacuum()) {
+                setDamping(skinLength);
+            } else {
+                setVacuum();
+            }
         }
     }
 
@@ -191,6 +201,7 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
     console.log('Courant factor = ' + getCourant());
     console.log('vacuum impendance = ' + getEta0());
     console.log('vacuum velocity = ' + getVel0());
+    console.log('isVacuum() = ' + isVacuum());
 
     const domainWidth = getDelta() * getNX();
     const domainHeight = getDelta() * getNY();
@@ -251,6 +262,9 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
         const sourceLambda = sourcePPW * getDelta();
         ctx.fillText('src wavelength = ' + (sourceLambda * 100.0).toFixed(3) + ' [cm] (' + sourcePPW.toFixed(1) + ' ppw)', 10.0, 60.0);
 
+        if (!isVacuum()) {
+            ctx.fillText('lossy medium (' + skinLength.toFixed(1) + ' ppsl)', 10.0, 650.0);
+        }
         ctx.fillText('periodic x,y = ' + getPeriodicX() + ',' + getPeriodicY(), 10.0, 670.0);
         ctx.fillText('xdim, ydim   = ' + (domainWidth * 100.0).toFixed(1) + ', ' + (domainHeight * 100.0).toFixed(1) + ' [cm]', 10.0, 690.0);
 

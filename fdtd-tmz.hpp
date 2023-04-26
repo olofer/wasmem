@@ -50,6 +50,15 @@ struct fdtdSource {
     type = fdtdSourceType::NoSource;
   }
 
+  // Compute conductivity (sigma) times space-step (delta) to achieve a skin-length of lhat space steps
+  // for the present value of the source wavelength (expressed in PPW)
+  double sigmaDelta(double lhat, 
+                    double mur) const
+  {
+    const double recip = lhat * lhat * vacuum_permeability * mur * M_PI * vacuum_velocity / this->ppw;
+    return 1.0 / recip;
+  }
+
 };
 
 template <int NX, int NY>
@@ -142,6 +151,25 @@ public:
         ceze[idx] = AEe;
       }
     }
+  }
+
+  void setDamping(double lhat) {
+    const double sigma_delta = source.sigmaDelta(lhat, relativePermeability);
+    setUniformMedium(relativePermeability,
+                     relativePermittivity,
+                     magneticConductivity,
+                     sigma_delta / getDelta());
+  }
+
+  void setVacuum() {
+    setUniformMedium(1.0, 1.0, 0.0, 0.0);
+  }
+
+  bool isVacuum() const {
+    return relativePermeability == 1.0 && 
+           relativePermittivity == 1.0 &&
+           magneticConductivity == 0.0 &&
+           electricConductivity == 0.0;
   }
 
   // NOTE: approximate; may require more work to get this accurate

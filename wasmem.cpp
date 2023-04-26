@@ -63,6 +63,21 @@ bool getPeriodicY() {
 }
 
 EMSCRIPTEN_KEEPALIVE
+void setVacuum(void) {
+  sim.setVacuum();
+}
+
+EMSCRIPTEN_KEEPALIVE
+bool isVacuum(void) {
+  return sim.isVacuum();
+}
+
+EMSCRIPTEN_KEEPALIVE
+void setDamping(double lhat) {
+  sim.setDamping(lhat);
+}
+
+EMSCRIPTEN_KEEPALIVE
 void sourceMove(double dx, 
                 double dy)
 {
