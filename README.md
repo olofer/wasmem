@@ -10,15 +10,17 @@ Run directly in browser: https://raw.githack.com/olofer/wasmem/main/payload/inde
 - `P` pause/unpause field updater (but not rendering)
 - `X` toggle periodic boundary in x (horizontal) direction
 - `Y` toggle periodic boundary in y (vertical) direction
-- `Z` toggle test rasterizer screen (see full colormap)
 - `C` set color range to current field range, or go back to source range
 - `D` toggle medium conductivity (damping effect) 
 - `+/-` change source frequency (i.e. points per wavelength)
 - `up/down` and `left/right` move source location
+- `A` toggle additive/absolute source injection
 - `0` turn off source (no source)
 - `1` sinusoidal continuous source
 - `2` pulsed Ricker wavelet source
 - `3` square wave source
+- `Z` toggle test rasterizer screen (see full colormap)
+- `S` toggle display of simulation information text
 
 The source location can be placed directly at the cursor with a mouse click.
 

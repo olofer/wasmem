@@ -36,6 +36,8 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
     var minimumEz = results.instance.exports.minimumEz;
     var maximumEz = results.instance.exports.maximumEz;
 
+    var sourceAdditive = results.instance.exports.sourceAdditive;
+    var isSourceAdditive = results.instance.exports.isSourceAdditive;
     var sourceMove = results.instance.exports.sourceMove;
     var sourcePlace = results.instance.exports.sourcePlace;
     var sourceTuneSet = results.instance.exports.sourceTuneSet;
@@ -56,6 +58,7 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
 
     const skinLength = 10.0; // points per skinlength (if damped medium)
 
+    var showStats = true;
     var showTestPattern = false;
     var pauseUpdater = false;
 
@@ -118,12 +121,13 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
             }
         }
 
-        if (key == 't' || key == 'T') {
+        /*if (key == 'o' || key == 'O') {
             console.log(getTimestep());
-        }
+            console.log(getDelta());
+        }*/
 
         if (key == 's' || key == 'S') {
-            console.log(getDelta());
+            showStats = !showStats;
         }
 
         if (key == 'z' || key == 'Z') {
@@ -158,6 +162,10 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
             } else {
                 setVacuum();
             }
+        }
+
+        if (key == 'a' || key == 'A') {
+            sourceAdditive(!isSourceAdditive());
         }
     }
 
@@ -250,20 +258,22 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
         }
         ctx.putImageData(img, 0, 0);
 
-        ctx.fillStyle = 'rgb(255, 255, 255)';
-        ctx.font = '16px Courier New';
-        ctx.fillText('sim. time = ' + (simTime * 1.0e9).toFixed(3) + ' [ns]', 10.0, 20.0);
-        ctx.fillText('wall time = ' + time.toFixed(3) + ' [s], <fps> = ' + filteredFPS.toFixed(1), 10.0, 40.0);
+        if (showStats) {
+            ctx.fillStyle = 'rgb(255, 255, 255)';
+            ctx.font = '16px Courier New';
+            ctx.fillText('sim. time = ' + (simTime * 1.0e9).toFixed(3) + ' [ns]', 10.0, 20.0);
+            ctx.fillText('wall time = ' + time.toFixed(3) + ' [s], <fps> = ' + filteredFPS.toFixed(1), 10.0, 40.0);
 
-        const sourcePPW = sourceTuneGet()
-        const sourceLambda = sourcePPW * getDelta();
-        ctx.fillText('src wavelength = ' + (sourceLambda * 100.0).toFixed(3) + ' [cm] (' + sourcePPW.toFixed(1) + ' ppw)', 10.0, 60.0);
+            const sourcePPW = sourceTuneGet()
+            const sourceLambda = sourcePPW * getDelta();
+            ctx.fillText('src lambda = ' + (sourceLambda * 100.0).toFixed(3) + ' [cm] (' + sourcePPW.toFixed(1) + ' ppw), add = ' + isSourceAdditive(), 10.0, 60.0);
 
-        if (!isVacuum()) {
-            ctx.fillText('lossy medium (' + skinLength.toFixed(1) + ' ppsl)', 10.0, 650.0);
+            if (!isVacuum()) {
+                ctx.fillText('lossy medium (' + skinLength.toFixed(1) + ' ppsl)', 10.0, 650.0);
+            }
+            ctx.fillText('periodic x,y = ' + getPeriodicX() + ',' + getPeriodicY(), 10.0, 670.0);
+            ctx.fillText('xdim, ydim   = ' + (domainWidth * 100.0).toFixed(1) + ', ' + (domainHeight * 100.0).toFixed(1) + ' [cm]', 10.0, 690.0);
         }
-        ctx.fillText('periodic x,y = ' + getPeriodicX() + ',' + getPeriodicY(), 10.0, 670.0);
-        ctx.fillText('xdim, ydim   = ' + (domainWidth * 100.0).toFixed(1) + ', ' + (domainHeight * 100.0).toFixed(1) + ' [cm]', 10.0, 690.0);
 
         if (pauseUpdater) return;
 

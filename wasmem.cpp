@@ -122,6 +122,16 @@ void sourceSquare(void) {
 }
 
 EMSCRIPTEN_KEEPALIVE
+void sourceAdditive(bool a) {
+  sim.sourceAdditive(a);
+}
+
+EMSCRIPTEN_KEEPALIVE
+bool isSourceAdditive(void) {
+  return sim.sourceAdditive();
+}
+
+EMSCRIPTEN_KEEPALIVE
 double fieldEnergyEz(void) {
   return sim.energyE();
 }

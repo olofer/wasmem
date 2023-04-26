@@ -115,7 +115,6 @@ public:
     std::memset(Ez, 0, NX * NY * sizeof(double));
   }
 
-  // NOTE: conductivities are not yet tested
   void setUniformMedium(double mur, 
                         double epr,
                         double sigmam,
@@ -321,6 +320,14 @@ public:
 
   double sourceAmplitude(double a) {
     source.amp = a;
+  }
+
+  bool sourceAdditive() const {
+    return source.additive;
+  }
+
+  void sourceAdditive(bool a) {
+    source.additive = a;
   }
 
 private:
