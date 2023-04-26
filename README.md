@@ -1,7 +1,7 @@
 # wasmem
 
 ## Summary
-Run two-dimensional finite-difference time-domain electromagnetic simulations directly in the browser. Interact with the simulation using keyboard and mouse actions. The simulation is written in `C++`, compiled to `WASM`, and the application is orchestrated in `JS`.
+Run two-dimensional finite-difference time-domain electromagnetic simulations directly in the browser. Interact with the simulation using keyboard and mouse actions. At this time, the simulator is limited to $\mathrm{TM}^z$ polarization and visualizes the $z$-component of the electric field: $E_z(x,y)$. The $x$ and $y$ components of the $B$ field are also part of the simulation state but not (yet) rasterized. The simulation is written in `C++`, compiled to `WASM`, and the application is orchestrated in `JS`.
 
 Run directly in browser: https://raw.githack.com/olofer/wasmem/main/payload/index.html
 
@@ -23,7 +23,7 @@ Run directly in browser: https://raw.githack.com/olofer/wasmem/main/payload/inde
 The source location can be placed directly at the cursor with a mouse click.
 
 ### Local build & run
-Clone repo. Run `./build.sh` and then `./run-html.sh` (or e.g. `./run-html.sh wsl-edge` to select another browser, assuming WSL2 environment).
+Clone repo. Run `./build.sh` and then `./run-html.sh` (or e.g. `./run-html.sh wsl-edge` to select another browser, assuming WSL2 environment). For the build to succeed, the `emscripten` is requried (see link below).
 
 ## TODO
 - [ ] support for absorbing boundaries
@@ -34,3 +34,4 @@ Clone repo. Run `./build.sh` and then `./run-html.sh` (or e.g. `./run-html.sh ws
 ## References
 - https://en.wikipedia.org/wiki/Finite-difference_time-domain_method
 - https://eecs.wsu.edu/~schneidj/ufdtd/
+- `emscripten`: https://github.com/emscripten-core/emsdk
