@@ -78,6 +78,13 @@ void setDamping(double lhat) {
 }
 
 EMSCRIPTEN_KEEPALIVE
+void dropGaussian(double x, 
+                  double y) 
+{
+  sim.superimposeGaussian(x, y, 10.0, 10.0);
+}
+
+EMSCRIPTEN_KEEPALIVE
 void sourceMove(double dx, 
                 double dy)
 {

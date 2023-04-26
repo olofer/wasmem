@@ -47,6 +47,7 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
     var sourceRicker = results.instance.exports.sourceRicker;
     var sourceSquare = results.instance.exports.sourceSquare;
 
+    var dropGaussian = results.instance.exports.dropGaussian;
     var fieldEnergyEz = results.instance.exports.fieldEnergyEz;
 
     var initDataBuffer = results.instance.exports.initDataBuffer;
@@ -166,6 +167,10 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
 
         if (key == 'a' || key == 'A') {
             sourceAdditive(!isSourceAdditive());
+        }
+
+        if (key == 'g' || key == 'G') {
+            dropGaussian(getNX() / 2.0, getNY() / 2.0);
         }
     }
 

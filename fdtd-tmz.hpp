@@ -171,6 +171,22 @@ public:
            electricConductivity == 0.0;
   }
 
+  // add Gaussian centered at (xc, yc) onto the Ez field (units are points)
+  void superimposeGaussian(double xc, 
+                           double yc, 
+                           double sigmax, 
+                           double sigmay)
+  {
+    for (int ix = 1; ix < NX - 1; ix++) {
+      for (int iy = 1; iy < NY - 1; iy++) {
+        const int idx = index(ix, iy);
+        const double xhat = ((double) ix - xc) / sigmax;
+        const double yhat = ((double) iy - yc) / sigmay;
+        Ez[idx] += std::exp(-0.5 * (xhat * xhat + yhat * yhat));
+      }
+    }
+  }
+
   // NOTE: approximate; may require more work to get this accurate
   double energyE() const {
     double sum = 0.0;

@@ -19,6 +19,7 @@ Run directly in browser: https://raw.githack.com/olofer/wasmem/main/payload/inde
 - `1` sinusoidal continuous source
 - `2` pulsed Ricker wavelet source
 - `3` square wave source
+- `G` superimpose a Gaussian into the domain center
 - `Z` toggle test rasterizer screen (see full colormap)
 - `S` toggle display of simulation information text
 
@@ -27,13 +28,14 @@ The source location can be placed directly at the cursor with a mouse click.
 ### Local build & run
 Clone repo. Run `./build.sh` and then `./run-html.sh` (or e.g. `./run-html.sh wsl-edge` to select another browser, assuming WSL2 environment). For the build to succeed, the `emscripten` is requried (see link below).
 
-## TODO
-- [ ] support for absorbing boundaries
-- [ ] evaluate/visualize total EM field energy density; or at least Hx, Hy
-- [ ] speed up main rasterizer (how? floats?!)
-- [ ] more sources, axis aligned lines? (and option to add or set source)
-
 ## References
 - https://en.wikipedia.org/wiki/Finite-difference_time-domain_method
 - https://eecs.wsu.edu/~schneidj/ufdtd/
 - `emscripten`: https://github.com/emscripten-core/emsdk
+
+## TODO
+- [ ] absorbing boundaries
+- [ ] medium editor
+- [ ] rasterizer speed up
+- [ ] more source options
+- [ ] visualization of $H$, and $u_E,u_B$
