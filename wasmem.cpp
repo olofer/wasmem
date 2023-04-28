@@ -129,6 +129,11 @@ void sourceSquare(void) {
 }
 
 EMSCRIPTEN_KEEPALIVE
+void sourceSaw(void) {
+  sim.sourceType(TMz::fdtdSourceType::Sawtooth);
+}
+
+EMSCRIPTEN_KEEPALIVE
 void sourceAdditive(bool a) {
   sim.sourceAdditive(a);
 }

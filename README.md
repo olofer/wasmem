@@ -19,7 +19,8 @@ Run directly in browser: https://raw.githack.com/olofer/wasmem/main/payload/inde
 - `0` turn off source (no source)
 - `1` sinusoidal continuous source
 - `2` pulsed Ricker wavelet source
-- `3` square wave source
+- `3` square wave source (unresolved)
+- `4` sawtooth wave source (unresolved)
 - `G` superimpose a Gaussian into the domain center
 - `Z` toggle test rasterizer screen (see full colormap)
 - `S` toggle display of simulation information text
@@ -38,5 +39,5 @@ Clone repo. Run `./build.sh` and then `./run-html.sh` (or e.g. `./run-html.sh ws
 - [ ] absorbing boundaries
 - [ ] medium editor
 - [ ] rasterizer speed up
-- [ ] more source options
+- [ ] more source options & bandlimit 
 - [ ] visualization of $H$, and $u_E,u_B$

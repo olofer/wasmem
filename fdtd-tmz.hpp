@@ -13,6 +13,7 @@ enum fdtdSourceType {
   Monochromatic,
   RickerPulse,
   SquareWave,
+  Sawtooth
 };
 
 struct fdtdSource {
@@ -44,6 +45,11 @@ struct fdtdSource {
     const int qeff = q % (2 * qd);
     const double eta = M_PI * courant_factor * (qeff - qd) / ppw;
     return amp * std::exp(-1.0 * eta * eta) * (1.0 - 2.0 * eta * eta);
+  }
+
+  double sawtooth(int q) const {
+    const int Q = static_cast<int>(this->ppw / courant_factor);
+    return (-1 + 2.0 * static_cast<double>(q % Q) / Q) * (this->amp);
   }
 
   void off() {
@@ -285,7 +291,7 @@ public:
       for (int j = 0; j < h; j++) {
         const double yj = ymax - j * yupp;
         const double yhatj = (yj - ygmin) / delta;
-        const double Ezij = interpolateEz(xhati, yhatj);
+        const double Ezij = interpolate(Ez, xhati, yhatj);
         imgdata[i + j * w] = rgb_viridis((Ezij - ezmin) / crange);
       }
     }
@@ -393,18 +399,19 @@ private:
     return (int) std::round((y - getYmin()) / getDelta());
   }
 
-  double interpolateEz(double xhat, 
-                       double yhat) const
+  double interpolate(const double* f,
+                     double xhat, 
+                     double yhat) const
   {
     const int xi = (int) xhat;
     const int yi = (int) yhat;
     const double etax = xhat - xi;
     const double etay = yhat - yi;
 
-    const double v00 = Ez[index(xi, yi)];
-    const double v01 = Ez[index(xi, yi + 1)];
-    const double v10 = Ez[index(xi + 1, yi)];
-    const double v11 = Ez[index(xi + 1, yi + 1)];
+    const double v00 = f[index(xi, yi)];
+    const double v01 = f[index(xi, yi + 1)];
+    const double v10 = f[index(xi + 1, yi)];
+    const double v11 = f[index(xi + 1, yi + 1)];
 
     const double w00 = (1.0 - etax) * (1.0 - etay);
     const double w01 = (1.0 - etax) * etay;
@@ -516,6 +523,10 @@ private:
 
     case fdtdSourceType::SquareWave:
       Sxy = (source.sinusoidal(static_cast<double>(updateCounter)) < 0.0 ? -source.amp : source.amp);
+      break;
+
+    case fdtdSourceType::Sawtooth:
+      Sxy = source.sawtooth(updateCounter);
       break;
 
     case fdtdSourceType::NoSource:

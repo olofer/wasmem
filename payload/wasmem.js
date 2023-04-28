@@ -46,6 +46,7 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
     var sourceMono = results.instance.exports.sourceMono;
     var sourceRicker = results.instance.exports.sourceRicker;
     var sourceSquare = results.instance.exports.sourceSquare;
+    var sourceSaw = results.instance.exports.sourceSaw;
 
     var dropGaussian = results.instance.exports.dropGaussian;
     var fieldEnergyEz = results.instance.exports.fieldEnergyEz;
@@ -123,6 +124,10 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
 
         if (key == '3') {
             sourceSquare();
+        }
+
+        if (key == '4') {
+            sourceSaw();
         }
 
         if (key == 'c' || key == 'C') {
