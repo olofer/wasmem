@@ -1,7 +1,10 @@
 # wasmem
 
-## TLDR
+## Summary
 Project using `WASM` with `C++` to write into `html` canvas (indirectly via `putImageData`). 
 
-## Things to do
-Browser application runs FDTD EM simulation and renders to canvas along the way. It should also be interactive.
+This branch can be used as a template for projects that need this type of functionality. To clone this branch directly run the following command.
+
+```
+git clone -b template-wasm-img --single-branch https://github.com/olofer/wasmem.git
+```
