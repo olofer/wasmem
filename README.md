@@ -15,6 +15,7 @@ Run directly in browser: https://raw.githack.com/olofer/wasmem/main/payload/inde
 - `+/-` change source frequency (i.e. points per wavelength)
 - `up/down` and `left/right` move source location
 - `A` toggle additive/absolute source injection
+- `pgup/pgdown` increase or decrease the medium skin length (damping)
 - `0` turn off source (no source)
 - `1` sinusoidal continuous source
 - `2` pulsed Ricker wavelet source

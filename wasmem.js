@@ -57,11 +57,13 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
     const dx = 1.0e-3; // 1mm per point
     const dppw = 1.0;
 
-    const skinLength = 10.0; // points per skinlength (if damped medium)
+    var skinLength = 10.0; // points per skinlength (if damped medium)
 
     var showStats = true;
     var showTestPattern = false;
     var pauseUpdater = false;
+
+    var simTime = 0.0;
 
     var useSourceColorValue = true;
     var minColorValue = 0.0;
@@ -86,6 +88,17 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
     
         if (code == 40) {  // down
             sourceMove(0.0, -dx);
+        }
+
+        if (code == 33) { // pgup
+            skinLength += dppw;
+            if (!isVacuum()) setDamping(skinLength);
+        }
+
+        if (code == 34) { // pgdown
+            skinLength -= dppw;
+            if (skinLength < 5.0) skinLength = 5.0;
+            if (!isVacuum()) setDamping(skinLength);
         }
 
         if (key == '+') {
@@ -122,11 +135,6 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
             }
         }
 
-        /*if (key == 'o' || key == 'O') {
-            console.log(getTimestep());
-            console.log(getDelta());
-        }*/
-
         if (key == 's' || key == 'S') {
             showStats = !showStats;
         }
@@ -141,6 +149,7 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
 
         if (key == 'r' || key == 'R') {
             resetSolver();
+            simTime = 0.0;
         }
 
         if (key == 'e' || key == 'E') {
@@ -226,9 +235,7 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
     const ctx = canvas.getContext('2d');
     
     var startTime = Date.now();
-    var delta = 0.0;
     var time = 0.0;
-    var simTime = 0.0;
     
     const betaFPSfilter = 1.0 / 100.0;
     var filteredFPS = 0.0;
@@ -242,9 +249,7 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
         startTime = currentTime;
 
         var elapsedTimeSeconds = elapsedTime * 1.0e-3;
-        delta += elapsedTimeSeconds;
-        time += delta;
-        delta = 0.0;
+        time += elapsedTimeSeconds;
 
         if (elapsedTimeSeconds > 0.0 && elapsedTimeSeconds < 1.0)
             filteredFPS = (betaFPSfilter) * (1.0 / elapsedTimeSeconds) + (1.0 - betaFPSfilter) * filteredFPS; 
@@ -271,13 +276,16 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
 
             const sourcePPW = sourceTuneGet()
             const sourceLambda = sourcePPW * getDelta();
-            ctx.fillText('src lambda = ' + (sourceLambda * 100.0).toFixed(3) + ' [cm] (' + sourcePPW.toFixed(1) + ' ppw), add = ' + isSourceAdditive(), 10.0, 60.0);
+            var src_str = 'src = ' + (sourceLambda * 100.0).toFixed(3) + ' [cm] (' + sourcePPW.toFixed(1) + ' ppw)';
+            if (isSourceAdditive()) src_str += ' additive'; else src_str += ' hardwired';
+            ctx.fillText(src_str, 10.0, 60.0);
 
             if (!isVacuum()) {
                 ctx.fillText('lossy medium (' + skinLength.toFixed(1) + ' ppsl)', 10.0, 650.0);
             }
-            ctx.fillText('periodic x,y = ' + getPeriodicX() + ',' + getPeriodicY(), 10.0, 670.0);
-            ctx.fillText('xdim, ydim   = ' + (domainWidth * 100.0).toFixed(1) + ', ' + (domainHeight * 100.0).toFixed(1) + ' [cm]', 10.0, 690.0);
+            const bc_str = 'period. x,y = ' + getPeriodicX() + ',' + getPeriodicY();
+            ctx.fillText(bc_str + ', view of Ez(x, y)', 10.0, 670.0);
+            ctx.fillText('xdim, ydim = ' + (domainWidth * 100.0).toFixed(1) + ', ' + (domainHeight * 100.0).toFixed(1) + ' [cm]', 10.0, 690.0);
         }
 
         if (pauseUpdater) return;
@@ -293,7 +301,6 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
         const rect = canvas.getBoundingClientRect();
         const mouseX = event.clientX - rect.left;
         const mouseY = event.clientY - rect.top;
-        //console.log('Mouse clicked at:', mouseX, mouseY);
         const newX = xmin + (mouseX / width) * domainWidth;
         const newY = domainHeight / 2.0 - (mouseY / height) * domainHeight;
         sourcePlace(newX, newY); 
