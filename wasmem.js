@@ -49,7 +49,8 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
     var sourceSaw = results.instance.exports.sourceSaw;
 
     var dropGaussian = results.instance.exports.dropGaussian;
-    var fieldEnergyEz = results.instance.exports.fieldEnergyEz;
+    var fieldEnergyE = results.instance.exports.fieldEnergyE;
+    var fieldEnergyB = results.instance.exports.fieldEnergyB;
 
     var initDataBuffer = results.instance.exports.initDataBuffer;
     var renderDataBufferTestPattern = results.instance.exports.renderDataBufferTestPattern;
@@ -157,10 +158,6 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
             simTime = 0.0;
         }
 
-        if (key == 'e' || key == 'E') {
-            console.log('E-field energy = ' + fieldEnergyEz() + ' [J / m]');
-        }
-
         if (key == 'x' || key == 'X') {
             setPeriodicX(!getPeriodicX());
             console.log('periodic in X = ' + getPeriodicX());
@@ -185,6 +182,13 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
 
         if (key == 'g' || key == 'G') {
             dropGaussian(getNX() / 2.0, getNY() / 2.0);
+        }
+
+        if (key == 'e' || key == 'E') {
+            const uE = fieldEnergyE() * 1.0e15; // femto-joule
+            const uB = fieldEnergyB() * 1.0e15;
+            const splitE = uE / (uE + uB);
+            console.log('uE + uB = ' + (uE + uB) + ' [fJ / m]; fract.(E) = ' + splitE.toFixed(4));
         }
     }
 
@@ -289,7 +293,7 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
                 ctx.fillText('lossy medium (' + skinLength.toFixed(1) + ' ppsl)', 10.0, 650.0);
             }
             const bc_str = 'period. x,y = ' + getPeriodicX() + ',' + getPeriodicY();
-            ctx.fillText(bc_str + ', view of Ez(x, y)', 10.0, 670.0);
+            ctx.fillText('TMz: Ez(x,y), ' + bc_str, 10.0, 670.0);
             ctx.fillText('xdim, ydim = ' + (domainWidth * 100.0).toFixed(1) + ', ' + (domainHeight * 100.0).toFixed(1) + ' [cm]', 10.0, 690.0);
         }
 

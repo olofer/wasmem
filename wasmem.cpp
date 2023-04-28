@@ -144,8 +144,13 @@ bool isSourceAdditive(void) {
 }
 
 EMSCRIPTEN_KEEPALIVE
-double fieldEnergyEz(void) {
+double fieldEnergyE(void) {
   return sim.energyE();
+}
+
+EMSCRIPTEN_KEEPALIVE
+double fieldEnergyB(void) {
+  return sim.energyB();
 }
 
 EMSCRIPTEN_KEEPALIVE

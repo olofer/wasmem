@@ -193,34 +193,27 @@ public:
     }
   }
 
-  // NOTE: approximate; may require more work to get this accurate
   double energyE() const {
     double sum = 0.0;
-    for (int iy = 0; iy < NY; iy++) {
-      for (int ix = 0; ix < NX; ix++) {
-        const double Ezi = Ez[index(ix, iy)];
-        sum += Ezi * Ezi;
-      }
+    for (int i = 0; i < size(); i++) {
+      const double Ezi = Ez[i];
+      sum += Ezi * Ezi;
     }
     const double delta = getDelta();
-    return relativePermittivity * vacuum_permittivity * sum * delta * delta / 2.0;
+    return relativePermittivity * vacuum_permittivity * (sum * delta * delta / 2.0);
   }
-/*
-  // NOTE: approximate; requires more thinking to get this accurate
+
+  // NOTE: not actually synchronized in time with the E-field energy calc above
   double energyB() const {
     double sum = 0.0;
-    for (int iy = 0; iy < NY - 1; iy++) {
-      for (int ix = 0; ix < NX - 1; ix++) {
-        const int idx =  index(ix, iy);
-        const double Hxi = Hx[idx];
-        const double Hyi = Hy[idx];
-        sum += Hxi * Hxi + Hyi * Hyi;
-      }
+    for (int i = 0; i < size(); i++) {
+      const double Hxi = Hx[i];
+      const double Hyi = Hy[i];
+      sum += Hxi * Hxi + Hyi * Hyi;
     }
     const double delta = getDelta();
-    return sum * delta * delta / (2.0 * relativePermeability * vacuum_permeability);
+    return relativePermeability * vacuum_permeability * (sum * delta * delta / 2.0);
   }
-*/
   
   void update() {
     updateHxHy();
