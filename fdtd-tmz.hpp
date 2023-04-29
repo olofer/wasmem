@@ -77,6 +77,7 @@ struct fdtdAbsorbingBoundary
   double ezBottom[6 * NX];
 
   double coef0, coef1, coef2;
+  int bskip;
 
   int indexLR(int m, int q, int n) const {
     return n * 6 + q * 3 + m;
@@ -106,12 +107,23 @@ struct fdtdAbsorbingBoundary
     return NX * iy + ix;
   }
 
-  void zero() {
+  void zeroX() {
     std::memset(ezLeft, 0 , sizeof(double) * 6 * NY);
     std::memset(ezRight, 0 , sizeof(double) * 6 * NY);
+  }
+
+  void zeroY() {
     std::memset(ezTop, 0 , sizeof(double) * 6 * NX);
     std::memset(ezBottom, 0 , sizeof(double) * 6 * NX);
   }
+
+  void zero() {
+    zeroX();
+    zeroY();
+  }
+
+  void cornerExclude() { bskip = 1; }
+  void cornerInclude() { bskip = 0; }
 
   void initialize(double cezh0, 
                   double chye0) 
@@ -121,57 +133,75 @@ struct fdtdAbsorbingBoundary
     coef0 = -(1.0 / temp1 - 2.0 + temp1) / temp2;
     coef1 = -2.0 * (temp1 - 1.0 / temp1) / temp2;
     coef2 = 4.0 * (temp1 + 1.0 / temp1) / temp2;
+    cornerExclude(); // NOTE: if this is 0; problems appear ** in combination ** with periodic boundaries
     zero();
   }
 
-  // WIP: bool absorb = true, default argument
-
-  void applyLeft(double* Ez) {
-    //for (int iy = 0; iy < NY; iy++) { // gives corner instability if Y is periodic
-    for (int iy = 1; iy < NY - 1; iy++) {
-      Ez[index(0, iy)] = coef0 * (Ez[index(2, iy)] + EzLeft(0, 1, iy)) + 
-                         coef1 * (EzLeft(0, 0, iy) + EzLeft(2, 0, iy) - Ez[index(1, iy)] - EzLeft(1, 1, iy)) +
-                         coef2 * EzLeft(1, 0, iy) - EzLeft(2, 1, iy);
-      for (int w = 0; w < 3; w++) {
-        ezLeft[indexLR(w, 1, iy)] = EzLeft(w, 0, iy);
-        ezLeft[indexLR(w, 0, iy)] = Ez[index(w, iy)];
-      }
+  void applyLeft(double* Ez,
+                 bool apply = true,
+                 bool record = true)
+  {
+    for (int iy = bskip; iy < NY - bskip; iy++) {
+      if (apply)
+        Ez[index(0, iy)] = coef0 * (Ez[index(2, iy)] + EzLeft(0, 1, iy)) + 
+                           coef1 * (EzLeft(0, 0, iy) + EzLeft(2, 0, iy) - Ez[index(1, iy)] - EzLeft(1, 1, iy)) +
+                           coef2 * EzLeft(1, 0, iy) - EzLeft(2, 1, iy);
+      if (record)
+        for (int w = 0; w < 3; w++) {
+          ezLeft[indexLR(w, 1, iy)] = EzLeft(w, 0, iy);
+          ezLeft[indexLR(w, 0, iy)] = Ez[index(w, iy)];
+        }
     }
   }
 
-  void applyRight(double* Ez) {
-    for (int iy = 1; iy < NY - 1; iy++) {
-      Ez[index(NX - 1, iy)] = coef0 * (Ez[index(NX - 3, iy)] + EzRight(0, 1, iy)) +
-                              coef1 * (EzRight(0, 0, iy) + EzRight(2, 0, iy) - Ez[index(NX - 2, iy)] - EzRight(1, 1, iy)) +
-                              coef2 * EzRight(1, 0, iy) - EzRight(2, 1, iy);
-      for (int w = 0; w < 3; w++) {
-        ezRight[indexLR(w, 1, iy)] = EzRight(w, 0, iy);
-        ezRight[indexLR(w, 0, iy)] = Ez[index(NX - 1 - w, iy)];
-      }
+  void applyRight(double* Ez,
+                  bool apply = true,
+                  bool record = true)
+  {
+    for (int iy = bskip; iy < NY - bskip; iy++) {
+      if (apply)
+        Ez[index(NX - 1, iy)] = coef0 * (Ez[index(NX - 3, iy)] + EzRight(0, 1, iy)) +
+                                coef1 * (EzRight(0, 0, iy) + EzRight(2, 0, iy) - Ez[index(NX - 2, iy)] - EzRight(1, 1, iy)) +
+                                coef2 * EzRight(1, 0, iy) - EzRight(2, 1, iy);
+      if (record)
+        for (int w = 0; w < 3; w++) {
+          ezRight[indexLR(w, 1, iy)] = EzRight(w, 0, iy);
+          ezRight[indexLR(w, 0, iy)] = Ez[index(NX - 1 - w, iy)];
+        }
     }
   }
 
-  void applyTop(double* Ez) {
-    for (int ix = 1; ix < NX - 1; ix++) {
-      Ez[index(ix, NY - 1)] = coef0 * (Ez[index(ix, NY - 3)] + EzTop(0, 1, ix)) + 
-                              coef1 * (EzTop(0, 0, ix) + EzTop(2, 0, ix) - Ez[index(ix, NY - 2)] - EzTop(1, 1, ix)) + 
-                              coef2 * EzTop(1, 0, ix) - EzTop(2, 1, ix);
-      for (int w = 0; w < 3; w++) {
-        ezTop[indexTB(w, 1, ix)] = EzTop(w, 0, ix);
-        ezTop[indexTB(w, 0, ix)] = Ez[index(ix, NY - 1 - w)];
-      }
+  void applyTop(double* Ez,
+                bool apply = true,
+                bool record = true)
+  {
+    for (int ix = bskip; ix < NX - bskip; ix++) {
+      if (apply)
+        Ez[index(ix, NY - 1)] = coef0 * (Ez[index(ix, NY - 3)] + EzTop(0, 1, ix)) + 
+                                coef1 * (EzTop(0, 0, ix) + EzTop(2, 0, ix) - Ez[index(ix, NY - 2)] - EzTop(1, 1, ix)) + 
+                                coef2 * EzTop(1, 0, ix) - EzTop(2, 1, ix);
+      if (record)
+        for (int w = 0; w < 3; w++) {
+          ezTop[indexTB(w, 1, ix)] = EzTop(w, 0, ix);
+          ezTop[indexTB(w, 0, ix)] = Ez[index(ix, NY - 1 - w)];
+        }
     }
   }
 
-  void applyBottom(double* Ez) {
-    for (int ix = 1; ix < NX - 1; ix++) {
-      Ez[index(ix, 0)] = coef0 * (Ez[index(ix, 2)] + EzBottom(0, 1, ix)) + 
-                         coef1 * (EzBottom(0, 0, ix) + EzBottom(2, 0, ix) - Ez[index(ix, 1)] - EzBottom(1, 1, ix)) + 
-                         coef2 * EzBottom(1, 0, ix) - EzBottom(2, 1, ix);
-      for (int w = 0; w < 3; w++) {
-        ezBottom[indexTB(w, 1, ix)] = EzBottom(w, 0, ix);
-        ezBottom[indexTB(w, 0, ix)] = Ez[index(ix, w)];
-      }
+  void applyBottom(double* Ez,
+                   bool apply = true,
+                   bool record = true)
+  {
+    for (int ix = bskip; ix < NX - bskip; ix++) {
+      if (apply)
+        Ez[index(ix, 0)] = coef0 * (Ez[index(ix, 2)] + EzBottom(0, 1, ix)) + 
+                           coef1 * (EzBottom(0, 0, ix) + EzBottom(2, 0, ix) - Ez[index(ix, 1)] - EzBottom(1, 1, ix)) + 
+                           coef2 * EzBottom(1, 0, ix) - EzBottom(2, 1, ix);
+      if (record)
+        for (int w = 0; w < 3; w++) {
+          ezBottom[indexTB(w, 1, ix)] = EzBottom(w, 0, ix);
+          ezBottom[indexTB(w, 0, ix)] = Ez[index(ix, w)];
+        }
     }
   }
 
@@ -198,6 +228,7 @@ public:
 
     setUniformMedium(1.0, 1.0, 0.0, 0.0);
     abc.initialize(cezh[0], chye[0]);
+
     reset();
 
     source.initDefault();
@@ -359,24 +390,40 @@ public:
     absorbingLeft = false;
     absorbingRight = false;
     periodicAlongX = true;
+    //if (isAbsorbingY()) abc.cornerExclude();
   }
 
   void setPeriodicY() {
     absorbingTop = false;
     absorbingBottom = false;
     periodicAlongY = true;
+    //if (isAbsorbingX()) abc.cornerExclude();
   }
 
   void setAbsorbingX() {
     absorbingLeft = true;
     absorbingRight = true;
     periodicAlongX = false;
+    abc.zeroX();
+    taperBorderX(20);
+    if (isAbsorbingY()) {
+      //abc.cornerInclude();
+      abc.zeroY();
+      taperBorderY(20);
+    }
   }
 
   void setAbsorbingY() {
     absorbingTop = true;
     absorbingBottom = true;
     periodicAlongY = false;
+    abc.zeroY();
+    taperBorderY(20);
+    if (isAbsorbingX()) {
+      //abc.cornerInclude();
+      abc.zeroX();
+      taperBorderX(20);
+    }
   }
 
   void setPECX() {
@@ -630,6 +677,31 @@ private:
     }
   }
 
+  /*void tameBoundaryEzX() {
+    for (int iy = 1; iy < NY - 1; iy++) {
+      Ez[index(0, iy)] = Ez[index(1, iy)];
+      Ez[index(NX - 1, iy)] = Ez[index(NX - 2, iy)];
+    }
+  }*/
+
+  void taperBorderX(int width) {
+    for (int iy = 0; iy < NY; iy++) {
+      for (int w = 0; w < width; w++) {
+        const double sw = static_cast<double>(w) / width;
+        const double swsq = sw * sw;
+        Ez[index(w, iy)] *= swsq;
+        Ez[index(NX - 1 - w, iy)] *= swsq;
+      }
+    }
+  }
+
+  /*void tameAllCorners() {
+    Ez[index(0, 0)] = (Ez[index(1, 0)] + Ez[index(0, 1)] + Ez[index(1, 1)]) / 3.0;
+    Ez[index(NX - 1, 0)] = (Ez[index(NX - 2, 0)] + Ez[index(NX - 1, 1)] + Ez[index(NX - 2, 1)]) / 3.0;
+    Ez[index(0, NY - 1)] = (Ez[index(1, NY - 1)] + Ez[index(0, NY - 2)] + Ez[index(1, NY - 2)]) / 3.0;
+    Ez[index(NX - 1, NY - 1)] = (Ez[index(NX - 2, NY - 1)] + Ez[index(NX - 1, NY - 2)] + Ez[index(NX - 2, NY - 2)]) / 3.0;
+  }*/
+
   void makeEzPeriodicY() {
     const int iymin = 0;
     for (int ix = 1; ix < NX - 1; ix++) {
@@ -652,6 +724,24 @@ private:
     for (int ix = 0; ix < NX; ix++) {
       Ez[index(ix, 0)] = 0.0;
       Ez[index(ix, NY - 1)] = 0.0;
+    }
+  }
+
+  /*void tameBoundaryEzY() {
+    for (int ix = 1; ix < NX - 1; ix++) {
+      Ez[index(ix, 0)] = Ez[index(ix, 1)];
+      Ez[index(ix, NY - 1)] = Ez[index(ix, NY - 2)];
+    }
+  }*/
+
+  void taperBorderY(int width) {
+    for (int ix = 0; ix < NX; ix++) {
+      for (int w = 0; w < width; w++) {
+        const double sw = static_cast<double>(w) / width;
+        const double swsq = sw * sw;
+        Ez[index(ix, w)] *= swsq;
+        Ez[index(ix, NY - 1 - w)] *= swsq;
+      }
     }
   }
 
