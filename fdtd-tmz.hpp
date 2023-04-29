@@ -149,6 +149,14 @@ struct fdtdAbsorbingBoundary
     }
   }
 
+  void applyTop(double* Ez) {
+    // ...
+  }
+
+  void applyBottom(double* Ez) {
+    // ...
+  }
+
 };
 
 template <int NX, int NY>
@@ -167,8 +175,8 @@ public:
       ygrid[iy] = ymin + iy * delta;
     }
 
-    setPeriodicX(true);
-    setPeriodicY(true);
+    setPeriodicX();
+    setPeriodicY();
 
     setUniformMedium(1.0, 1.0, 0.0, 0.0);
     abc.initialize(cezh[0], chye[0]);
@@ -200,6 +208,10 @@ public:
 
   bool isPeriodicX() const { return periodicAlongX; }
   bool isPeriodicY() const { return periodicAlongY; }
+  bool isAbsorbingX() const { return absorbingLeft && absorbingRight && !periodicAlongX; }
+  bool isAbsorbingY() const { return absorbingTop && absorbingBottom && !periodicAlongY; }
+  bool isMixedX() const { return (absorbingLeft ^ absorbingRight) && !periodicAlongX;  }
+  bool isMixedY() const { return (absorbingTop ^ absorbingBottom) && !periodicAlongY;  }
 
   void zeroField() {
     std::memset(Hx, 0, NX * NY * sizeof(double));
@@ -301,32 +313,66 @@ public:
     return relativePermeability * vacuum_permeability * (sum * delta * delta / 2.0);
   }
   
-  void update() {
+  void update()  /* full single timestep state update */
+  {
     updateHxHy();
     updateEz();
-    // FIXME: need management of BCs
-    if (periodicAlongX) makeEzPeriodicX();
-    if (!periodicAlongX) {
-      abc.applyLeft(Ez);
-      abc.applyRight(Ez);
+
+    if (periodicAlongX) {
+      makeEzPeriodicX();
+    } else {
+      if (absorbingLeft) abc.applyLeft(Ez);
+      if (absorbingRight) abc.applyRight(Ez);
     }
-    if (periodicAlongY) makeEzPeriodicY();
+
+    if (periodicAlongY) {
+      makeEzPeriodicY();
+    } else {
+      if (absorbingTop) abc.applyTop(Ez);
+      if (absorbingBottom) abc.applyBottom(Ez);
+    }
+
     applySource();
+
     updateCounter++;
   }
 
-  void setPeriodicX(bool onoff) {
-    periodicAlongX = onoff;
-    if (!periodicAlongX) {
-      zeroBoundaryEzX();
-    } 
+  void setPeriodicX() {
+    absorbingLeft = false;
+    absorbingRight = false;
+    periodicAlongX = true;
   }
 
-  void setPeriodicY(bool onoff) {
-    periodicAlongY = onoff;
-    if (!periodicAlongY) {
-      zeroBoundaryEzY();
-    } 
+  void setPeriodicY() {
+    absorbingTop = false;
+    absorbingBottom = false;
+    periodicAlongY = true;
+  }
+
+  void setAbsorbingX() {
+    absorbingLeft = true;
+    absorbingRight = true;
+    periodicAlongX = false;
+  }
+
+  void setAbsorbingY() {
+    absorbingTop = true;
+    absorbingBottom = true;
+    periodicAlongY = false;
+  }
+
+  void setPECX() {
+    absorbingLeft = false;
+    absorbingRight = false;
+    periodicAlongX = false;
+    zeroBoundaryEzX();
+  }
+
+  void setPECY() {
+    absorbingTop = false;
+    absorbingBottom = false;
+    periodicAlongY = false;
+    zeroBoundaryEzY();
   }
 
   double minimumEz() const {
@@ -468,6 +514,11 @@ private:
 
   bool periodicAlongX;
   bool periodicAlongY;
+
+  bool absorbingLeft;
+  bool absorbingRight;
+  bool absorbingTop;
+  bool absorbingBottom;
 
   fdtdAbsorbingBoundary<NX, NY> abc;
 

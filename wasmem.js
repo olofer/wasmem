@@ -14,10 +14,18 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
     var initSolver = results.instance.exports.initSolver;
     var resetSolver = results.instance.exports.resetSolver;
     var takeOneTimestep = results.instance.exports.takeOneTimestep;
+
     var getPeriodicX = results.instance.exports.getPeriodicX;
     var setPeriodicX = results.instance.exports.setPeriodicX;
     var getPeriodicY = results.instance.exports.getPeriodicY;
     var setPeriodicY = results.instance.exports.setPeriodicY;
+
+    var getAbsorbingX = results.instance.exports.getAbsorbingX;
+    var setAbsorbingX = results.instance.exports.setAbsorbingX;
+    var getAbsorbingY = results.instance.exports.getAbsorbingY;
+    var setAbsorbingY = results.instance.exports.setAbsorbingY;
+    var setPECX = results.instance.exports.setPECX;
+    var setPECY = results.instance.exports.setPECY;
 
     var setVacuum = results.instance.exports.setVacuum;
     var isVacuum = results.instance.exports.isVacuum;
@@ -158,14 +166,16 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
             simTime = 0.0;
         }
 
-        if (key == 'x' || key == 'X') {
-            setPeriodicX(!getPeriodicX());
-            console.log('periodic in X = ' + getPeriodicX());
+        if (key == 'x' || key == 'X') { // cycle boundary condition style for X dimension
+            if (getAbsorbingX()) setPeriodicX();
+                else if (getPeriodicX()) setPECX();
+                    else setAbsorbingX();
         }
 
-        if (key == 'y' || key == 'Y') {
-            setPeriodicY(!getPeriodicY());
-            console.log('periodic in Y = ' + getPeriodicY());
+        if (key == 'y' || key == 'Y') { // cycle BC for Y dimension
+            if (getAbsorbingY()) setPeriodicY();
+                else if (getPeriodicY()) setPECY();
+                    else setAbsorbingY();
         }
 
         if (key == 'd' || key == 'D') {
@@ -292,7 +302,10 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
             if (!isVacuum()) {
                 ctx.fillText('lossy medium (' + skinLength.toFixed(1) + ' ppsl)', 10.0, 650.0);
             }
-            const bc_str = 'period. x,y = ' + getPeriodicX() + ',' + getPeriodicY();
+            var bc_str = 'BCs: x = ';
+            if (getPeriodicX()) bc_str += 'periodic'; else if (getAbsorbingX()) bc_str += 'absorb'; else bc_str += 'reflect';
+            bc_str += ', y = ';
+            if (getPeriodicY()) bc_str += 'periodic'; else if (getAbsorbingY()) bc_str += 'absorb'; else bc_str += 'reflect';
             ctx.fillText('TMz: Ez(x,y), ' + bc_str, 10.0, 670.0);
             ctx.fillText('xdim, ydim = ' + (domainWidth * 100.0).toFixed(1) + ', ' + (domainHeight * 100.0).toFixed(1) + ' [cm]', 10.0, 690.0);
         }

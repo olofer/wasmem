@@ -8,8 +8,8 @@ Run directly in browser: https://raw.githack.com/olofer/wasmem/main/payload/inde
 ## Usage
 - `R` reset simulation state (zero fields, reset source)
 - `P` pause/unpause field updater (but not rendering)
-- `X` toggle periodic boundary in x (horizontal) direction
-- `Y` toggle periodic boundary in y (vertical) direction
+- `X` cycle boundary condition type for $x$ (horizontal) direction
+- `Y` cycle boundary condition type for $y$ (vertical) direction
 - `C` set color range to current field range, or go back to source range
 - `D` toggle medium conductivity (damping effect) 
 - `+/-` change source frequency (i.e. points per wavelength)
@@ -25,6 +25,7 @@ Run directly in browser: https://raw.githack.com/olofer/wasmem/main/payload/inde
 - `Z` toggle test rasterizer screen (see full colormap)
 - `S` toggle display of simulation information text
 
+Boundary conditions can be reflective, absorbing or periodic.
 The source location can be placed directly at the cursor with a mouse click.
 
 ### Local build & run
@@ -35,9 +36,8 @@ Clone repo. Run `./build.sh` and then `./run-html.sh` (or e.g. `./run-html.sh ws
 - https://eecs.wsu.edu/~schneidj/ufdtd/
 - `emscripten`: https://github.com/emscripten-core/emsdk
 
-## TODO
-- [ ] absorbing boundaries
+## Tasklist
+- [ ] more source options & bandlimit 
+- [ ] visualization of $H_x$, $H_y$
 - [ ] medium editor
 - [ ] rasterizer speed up
-- [ ] more source options & bandlimit 
-- [ ] visualization of $H$, and $u_E,u_B$

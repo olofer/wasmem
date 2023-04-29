@@ -43,23 +43,53 @@ void resetSolver(void) {
 }
 
 EMSCRIPTEN_KEEPALIVE
-void setPeriodicX(bool X) {
-  sim.setPeriodicX(X);
+void setPeriodicX(void) {
+  sim.setPeriodicX();
 }
 
 EMSCRIPTEN_KEEPALIVE
-bool getPeriodicX() {
+bool getPeriodicX(void) {
   return sim.isPeriodicX();
 }
 
 EMSCRIPTEN_KEEPALIVE
-void setPeriodicY(bool Y) {
-  sim.setPeriodicY(Y);
+void setPeriodicY(void) {
+  sim.setPeriodicY();
 }
 
 EMSCRIPTEN_KEEPALIVE
-bool getPeriodicY() {
+bool getPeriodicY(void) {
   return sim.isPeriodicY();
+}
+
+EMSCRIPTEN_KEEPALIVE
+void setAbsorbingX(void) {
+  sim.setAbsorbingX();
+}
+
+EMSCRIPTEN_KEEPALIVE
+bool getAbsorbingX(void) {
+  return sim.isAbsorbingX();
+}
+
+EMSCRIPTEN_KEEPALIVE
+void setAbsorbingY(void) {
+  sim.setAbsorbingY();
+}
+
+EMSCRIPTEN_KEEPALIVE
+bool getAbsorbingY(void) {
+  return sim.isAbsorbingY();
+}
+
+EMSCRIPTEN_KEEPALIVE
+void setPECX(void) {
+  sim.setPECX();
+}
+
+EMSCRIPTEN_KEEPALIVE
+void setPECY(void) {
+  sim.setPECY();
 }
 
 EMSCRIPTEN_KEEPALIVE
