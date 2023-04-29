@@ -124,6 +124,8 @@ struct fdtdAbsorbingBoundary
     zero();
   }
 
+  // WIP: bool absorb = true, default argument
+
   void applyLeft(double* Ez) {
     //for (int iy = 0; iy < NY; iy++) { // gives corner instability if Y is periodic
     for (int iy = 1; iy < NY - 1; iy++) {
@@ -150,11 +152,27 @@ struct fdtdAbsorbingBoundary
   }
 
   void applyTop(double* Ez) {
-    // ...
+    for (int ix = 1; ix < NX - 1; ix++) {
+      Ez[index(ix, NY - 1)] = coef0 * (Ez[index(ix, NY - 3)] + EzTop(0, 1, ix)) + 
+                              coef1 * (EzTop(0, 0, ix) + EzTop(2, 0, ix) - Ez[index(ix, NY - 2)] - EzTop(1, 1, ix)) + 
+                              coef2 * EzTop(1, 0, ix) - EzTop(2, 1, ix);
+      for (int w = 0; w < 3; w++) {
+        ezTop[indexTB(w, 1, ix)] = EzTop(w, 0, ix);
+        ezTop[indexTB(w, 0, ix)] = Ez[index(ix, NY - 1 - w)];
+      }
+    }
   }
 
   void applyBottom(double* Ez) {
-    // ...
+    for (int ix = 1; ix < NX - 1; ix++) {
+      Ez[index(ix, 0)] = coef0 * (Ez[index(ix, 2)] + EzBottom(0, 1, ix)) + 
+                         coef1 * (EzBottom(0, 0, ix) + EzBottom(2, 0, ix) - Ez[index(ix, 1)] - EzBottom(1, 1, ix)) + 
+                         coef2 * EzBottom(1, 0, ix) - EzBottom(2, 1, ix);
+      for (int w = 0; w < 3; w++) {
+        ezBottom[indexTB(w, 1, ix)] = EzBottom(w, 0, ix);
+        ezBottom[indexTB(w, 0, ix)] = Ez[index(ix, w)];
+      }
+    }
   }
 
 };
