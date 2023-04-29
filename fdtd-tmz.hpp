@@ -16,7 +16,8 @@ enum fdtdSourceType {
   Sawtooth
 };
 
-struct fdtdSource {
+struct fdtdSource
+{
   fdtdSourceType type;
   bool additive;
 
@@ -68,6 +69,89 @@ struct fdtdSource {
 };
 
 template <int NX, int NY>
+struct fdtdAbsorbingBoundary
+{
+  double ezLeft[6 * NY];
+  double ezRight[6 * NY];
+  double ezTop[6 * NX];
+  double ezBottom[6 * NX];
+
+  double coef0, coef1, coef2;
+
+  int indexLR(int m, int q, int n) const {
+    return n * 6 + q * 3 + m;
+  }
+
+  double EzLeft(int m, int q, int n) const {
+    return ezLeft[indexLR(m, q, n)];
+  }
+
+  double EzRight(int m, int q, int n) const {
+    return ezRight[indexLR(m, q, n)];
+  }
+
+  int indexTB(int n, int q, int m) const {
+    return m * 6 + q * 3 + n;
+  }
+
+  double EzTop(int n, int q, int m) const {
+    return ezTop[indexTB(n, q, m)];
+  }
+
+  double EzBottom(int n, int q, int m) const {
+    return ezBottom[indexTB(n, q, m)];
+  }
+
+  int index(int ix, int iy) const {
+    return NX * iy + ix;
+  }
+
+  void zero() {
+    std::memset(ezLeft, 0 , sizeof(double) * 6 * NY);
+    std::memset(ezRight, 0 , sizeof(double) * 6 * NY);
+    std::memset(ezTop, 0 , sizeof(double) * 6 * NX);
+    std::memset(ezBottom, 0 , sizeof(double) * 6 * NX);
+  }
+
+  void initialize(double cezh0, 
+                  double chye0) 
+  {
+    const double temp1 = std::sqrt(cezh0 * chye0);
+    const double temp2 = 1.0 / temp1 + 2.0 + temp1;
+    coef0 = -(1.0 / temp1 - 2.0 + temp1) / temp2;
+    coef1 = -2.0 * (temp1 - 1.0 / temp1) / temp2;
+    coef2 = 4.0 * (temp1 + 1.0 / temp1) / temp2;
+    zero();
+  }
+
+  void applyLeft(double* Ez) {
+    //for (int iy = 0; iy < NY; iy++) { // gives corner instability if Y is periodic
+    for (int iy = 1; iy < NY - 1; iy++) {
+      Ez[index(0, iy)] = coef0 * (Ez[index(2, iy)] + EzLeft(0, 1, iy)) + 
+                         coef1 * (EzLeft(0, 0, iy) + EzLeft(2, 0, iy) - Ez[index(1, iy)] - EzLeft(1, 1, iy)) +
+                         coef2 * EzLeft(1, 0, iy) - EzLeft(2, 1, iy);
+      for (int w = 0; w < 3; w++) {
+        ezLeft[indexLR(w, 1, iy)] = EzLeft(w, 0, iy);
+        ezLeft[indexLR(w, 0, iy)] = Ez[index(w, iy)];
+      }
+    }
+  }
+
+  void applyRight(double* Ez) {
+    for (int iy = 1; iy < NY - 1; iy++) {
+      Ez[index(NX - 1, iy)] = coef0 * (Ez[index(NX - 3, iy)] + EzRight(0, 1, iy)) +
+                              coef1 * (EzRight(0, 0, iy) + EzRight(2, 0, iy) - Ez[index(NX - 2, iy)] - EzRight(1, 1, iy)) +
+                              coef2 * EzRight(1, 0, iy) - EzRight(2, 1, iy);
+      for (int w = 0; w < 3; w++) {
+        ezRight[indexLR(w, 1, iy)] = EzRight(w, 0, iy);
+        ezRight[indexLR(w, 0, iy)] = Ez[index(NX - 1 - w, iy)];
+      }
+    }
+  }
+
+};
+
+template <int NX, int NY>
 class fdtdSolver
 {
 public:
@@ -87,6 +171,7 @@ public:
     setPeriodicY(true);
 
     setUniformMedium(1.0, 1.0, 0.0, 0.0);
+    abc.initialize(cezh[0], chye[0]);
     reset();
 
     source.initDefault();
@@ -94,6 +179,7 @@ public:
 
   void reset() {
     zeroField();
+    abc.zero();
     resetUpdateCount();
   }
 
@@ -218,7 +304,12 @@ public:
   void update() {
     updateHxHy();
     updateEz();
+    // FIXME: need management of BCs
     if (periodicAlongX) makeEzPeriodicX();
+    if (!periodicAlongX) {
+      abc.applyLeft(Ez);
+      abc.applyRight(Ez);
+    }
     if (periodicAlongY) makeEzPeriodicY();
     applySource();
     updateCounter++;
@@ -377,6 +468,8 @@ private:
 
   bool periodicAlongX;
   bool periodicAlongY;
+
+  fdtdAbsorbingBoundary<NX, NY> abc;
 
   fdtdSource source;
 

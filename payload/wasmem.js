@@ -187,8 +187,6 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
         if (key == 'e' || key == 'E') {
             const uE = fieldEnergyE() * 1.0e15; // femto-joule
             const uB = fieldEnergyB() * 1.0e15;
-            //console.log('uE = ' + uE + ' [fJ / m]');
-            //console.log('uB = ' + uB + ' [fJ / m]');
             const splitE = uE / (uE + uB);
             console.log('uE + uB = ' + (uE + uB) + ' [fJ / m]; fract.(E) = ' + splitE.toFixed(4));
         }
