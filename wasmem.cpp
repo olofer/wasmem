@@ -2,6 +2,7 @@
 #include <cstring>
 #include <cmath>
 
+#include "halfband.hpp"
 #include "rgb-utils.hpp"
 #include "fdtd-tmz.hpp"
 
@@ -112,6 +113,11 @@ void dropGaussian(double x,
                   double y) 
 {
   sim.superimposeGaussian(x, y, 10.0, 10.0);
+}
+
+EMSCRIPTEN_KEEPALIVE
+void applyHalfbandFilter(void) {
+  sim.halfbandFilterXY();
 }
 
 EMSCRIPTEN_KEEPALIVE

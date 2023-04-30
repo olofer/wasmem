@@ -215,6 +215,8 @@ public:
                   double ymin, 
                   double delta)
   {
+    hbf.init();
+
     for (int ix = 0; ix < NX; ix++) {
       xgrid[ix] = xmin + ix * delta;
     }
@@ -386,6 +388,18 @@ public:
     updateCounter++;
   }
 
+  void halfbandFilterXY() {
+    halfbandFilterXY_(Ez);
+    halfbandFilterXY_(Hx);
+    halfbandFilterXY_(Hy);
+
+    const int taper = 8;
+    taperBorderX(taper);
+    abc.zeroX();
+    taperBorderY(taper);
+    abc.zeroY();
+  }
+
   void setPeriodicX() {
     absorbingLeft = false;
     absorbingRight = false;
@@ -401,28 +415,30 @@ public:
   }
 
   void setAbsorbingX() {
+    const int taper = 12;
     absorbingLeft = true;
     absorbingRight = true;
     periodicAlongX = false;
     abc.zeroX();
-    taperBorderX(20);
+    taperBorderX(taper);
     if (isAbsorbingY()) {
       //abc.cornerInclude();
       abc.zeroY();
-      taperBorderY(20);
+      taperBorderY(taper);
     }
   }
 
   void setAbsorbingY() {
+    const int taper = 12;
     absorbingTop = true;
     absorbingBottom = true;
     periodicAlongY = false;
     abc.zeroY();
-    taperBorderY(20);
+    taperBorderY(taper);
     if (isAbsorbingX()) {
       //abc.cornerInclude();
       abc.zeroX();
-      taperBorderX(20);
+      taperBorderX(taper);
     }
   }
 
@@ -559,6 +575,8 @@ private:
   double Hy[NX * NY]; // at t - 0.5 * deltat
   double Ez[NX * NY]; // at t
 
+  double Y[NX + NY]; // can be used for temporary filter results
+
   // uniform medium (set properties)
   double relativePermittivity;
   double relativePermeability;
@@ -588,6 +606,8 @@ private:
   fdtdAbsorbingBoundary<NX, NY> abc;
 
   fdtdSource source;
+
+  HalfbandFilter<5> hbf;
 
   int index(int ix, int iy) const {
     return NX * iy + ix;
@@ -677,13 +697,6 @@ private:
     }
   }
 
-  /*void tameBoundaryEzX() {
-    for (int iy = 1; iy < NY - 1; iy++) {
-      Ez[index(0, iy)] = Ez[index(1, iy)];
-      Ez[index(NX - 1, iy)] = Ez[index(NX - 2, iy)];
-    }
-  }*/
-
   void taperBorderX(int width) {
     for (int iy = 0; iy < NY; iy++) {
       for (int w = 0; w < width; w++) {
@@ -691,16 +704,13 @@ private:
         const double swsq = sw * sw;
         Ez[index(w, iy)] *= swsq;
         Ez[index(NX - 1 - w, iy)] *= swsq;
+        Hx[index(w, iy)] *= swsq;
+        Hx[index(NX - 1 - w, iy)] *= swsq;
+        Hy[index(w, iy)] *= swsq;
+        Hy[index(NX - 1 - w, iy)] *= swsq;
       }
     }
   }
-
-  /*void tameAllCorners() {
-    Ez[index(0, 0)] = (Ez[index(1, 0)] + Ez[index(0, 1)] + Ez[index(1, 1)]) / 3.0;
-    Ez[index(NX - 1, 0)] = (Ez[index(NX - 2, 0)] + Ez[index(NX - 1, 1)] + Ez[index(NX - 2, 1)]) / 3.0;
-    Ez[index(0, NY - 1)] = (Ez[index(1, NY - 1)] + Ez[index(0, NY - 2)] + Ez[index(1, NY - 2)]) / 3.0;
-    Ez[index(NX - 1, NY - 1)] = (Ez[index(NX - 2, NY - 1)] + Ez[index(NX - 1, NY - 2)] + Ez[index(NX - 2, NY - 2)]) / 3.0;
-  }*/
 
   void makeEzPeriodicY() {
     const int iymin = 0;
@@ -727,13 +737,6 @@ private:
     }
   }
 
-  /*void tameBoundaryEzY() {
-    for (int ix = 1; ix < NX - 1; ix++) {
-      Ez[index(ix, 0)] = Ez[index(ix, 1)];
-      Ez[index(ix, NY - 1)] = Ez[index(ix, NY - 2)];
-    }
-  }*/
-
   void taperBorderY(int width) {
     for (int ix = 0; ix < NX; ix++) {
       for (int w = 0; w < width; w++) {
@@ -741,6 +744,10 @@ private:
         const double swsq = sw * sw;
         Ez[index(ix, w)] *= swsq;
         Ez[index(ix, NY - 1 - w)] *= swsq;
+        Hx[index(ix, w)] *= swsq;
+        Hx[index(ix, NY - 1 - w)] *= swsq;
+        Hy[index(ix, w)] *= swsq;
+        Hy[index(ix, NY - 1 - w)] *= swsq;
       }
     }
   }
@@ -782,6 +789,21 @@ private:
       Ez[index(ix, iy)] += Sxy;
     } else {
       Ez[index(ix, iy)] = Sxy;
+    }
+  }
+
+  void halfbandFilterXY_(double* f) {
+    // filter horizontally
+    for (int iy = 0; iy < NY; iy++) {
+      hbf.apply(Y, 1, &f[index(0, iy)], 1, NX);
+      std::memcpy(&f[index(0, iy)], Y, sizeof(double) * NX);
+    }
+    // filter vertically
+    for (int ix = 0; ix < NX; ix++) {
+      hbf.apply(Y, 1, &f[index(ix, 0)], NX, NY);
+      for (int iy = 0; iy < NY; iy++) {
+        f[index(ix, iy)] = Y[iy];
+      }
     }
   }
 

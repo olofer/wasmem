@@ -24,12 +24,14 @@ Run directly in browser: https://raw.githack.com/olofer/wasmem/main/payload/inde
 - `G` superimpose a Gaussian into the domain center
 - `Z` toggle test rasterizer screen (see full colormap)
 - `S` toggle display of simulation information text
+- `H` apply a half-band filter to state fields
 
 ### Notes
 - Boundary conditions can be reflective, absorbing, or periodic
 - The source location can be placed directly at the cursor with a mouse click
 - Swapping sources and BCs introduces sharp under-resolved transients
 - It can be useful to press `C` a few times to adapt the colorscale
+- Instabilities may develop with absorbing BCs; reset with `R`, or damp with `D`
 
 ### Local build & run
 Clone repo. Run `./build.sh` and then `./run-html.sh` (or e.g. `./run-html.sh wsl-edge` to select another browser, assuming WSL2 environment). For the build to succeed, the `emscripten` is requried (see link below).

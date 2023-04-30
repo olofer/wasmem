@@ -27,6 +27,8 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
     var setPECX = results.instance.exports.setPECX;
     var setPECY = results.instance.exports.setPECY;
 
+    var applyHalfbandFilter = results.instance.exports.applyHalfbandFilter;
+
     var setVacuum = results.instance.exports.setVacuum;
     var isVacuum = results.instance.exports.isVacuum;
     var setDamping = results.instance.exports.setDamping;
@@ -199,6 +201,10 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
             const uB = fieldEnergyB() * 1.0e15;
             const splitE = uE / (uE + uB);
             console.log('uE + uB = ' + (uE + uB) + ' [fJ / m]; fract.(E) = ' + splitE.toFixed(4));
+        }
+
+        if (key == 'h' || key == 'H') {
+            applyHalfbandFilter();
         }
     }
 
