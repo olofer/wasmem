@@ -25,12 +25,29 @@ public:
       tail[i] = v;
   }
 
+  void applyHold(double* y,
+                 int stridey,
+                 const double* x,
+                 int stridex, 
+                 int L)
+  {
+    setHead(x[0]);
+    setTail(x[L - 1]);
+    apply(y, stridey, x, stridex, L);
+  }
+
   void apply(double* y,
              int stridey,
              const double* x,
              int stridex, 
              int L)
   {
+    for (int i = 0; i < K; i++) {
+      double s = 0.0;
+      for (int n = -K; n < -i; n++) s += b[n + K] * head[n + K + i];
+      for (int n = -i; n <= K; n++) s += b[n + K] * x[(n + i) * stridex];
+      y[i * stridey] = s;
+    }
     for (int i = K; i < L - K; i++) {
       double s = 0.0;
       for (int n = -K; n <= K; n++) {
@@ -38,13 +55,26 @@ public:
       }
       y[i * stridey] = s;
     }
+    for (int i = L - K; i < L; i++) {
+      double s = 0.0;
+      for (int n = -K; n <= 0; n++) s += b[n + K] * x[(n + i) * stridex];
+      // TODO: apply tail
+      // ...
+      y[i * stridey] = s;
+    }
   }
 
-  void applyPeriodic(double* x, 
-                     int L, 
-                     int stride = 1)
+  void applyPeriodic(double* y,
+                     int stridey,
+                     const double* x, 
+                     int stridex, 
+                     int L)
   {
-    // ...
+    for (int i = 0; i < K; i++) {
+      head[K - i - 1] = x[(L - i - 1) * stridex];
+      tail[i] = x[i * stridex];
+    }
+    apply(y, stridey, x, stridex, L);
   }
 
 private:
