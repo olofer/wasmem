@@ -57,9 +57,8 @@ public:
     }
     for (int i = L - K; i < L; i++) {
       double s = 0.0;
-      for (int n = -K; n <= 0; n++) s += b[n + K] * x[(n + i) * stridex];
-      // TODO: apply tail
-      // ...
+      for (int n = -K; n < L - i; n++) s += b[n + K] * x[(n + i) * stridex];
+      for (int n = L - i; n <= K; n++)  s += b[n + K] * tail[n + i - L];
       y[i * stridey] = s;
     }
   }
