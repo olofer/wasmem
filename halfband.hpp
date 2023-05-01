@@ -26,22 +26,11 @@ public:
       tail[i] = v;
   }
 
-  void applyHold(double* y,
-                 int stridey,
-                 const double* x,
-                 int stridex, 
-                 int L)
-  {
-    setHead(x[0]);
-    setTail(x[L - 1]);
-    apply(y, stridey, x, stridex, L);
-  }
-
   void apply(double* y,
              int stridey,
              const double* x,
              int stridex, 
-             int L)
+             int L) const
   {
     for (int i = 0; i < K; i++) {
       double s = 0.0;
@@ -68,12 +57,34 @@ public:
                      int stridey,
                      const double* x, 
                      int stridex, 
-                     int L)
+                     int L) 
   {
     for (int i = 0; i < K; i++) {
       head[K - i - 1] = x[(L - i - 1) * stridex];
       tail[i] = x[i * stridex];
     }
+    apply(y, stridey, x, stridex, L);
+  }
+
+  void applyZero(double* y,
+                 int stridey,
+                 const double* x,
+                 int stridex, 
+                 int L)
+  {
+    setHead(0.0);
+    setTail(0.0);
+    apply(y, stridey, x, stridex, L);
+  }
+
+  void applyHold(double* y,
+                 int stridey,
+                 const double* x,
+                 int stridex, 
+                 int L)
+  {
+    setHead(x[0]);
+    setTail(x[L - 1]);
     apply(y, stridey, x, stridex, L);
   }
 
