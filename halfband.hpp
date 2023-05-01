@@ -13,6 +13,7 @@ public:
       const double wn = 0.54 + 0.46 * std::cos(npi / K);
       b[K + n] *= wn;
     }
+    dc_normalize();
   }
 
   void setHead(double v) {
@@ -74,6 +75,19 @@ public:
       tail[i] = x[i * stridex];
     }
     apply(y, stridey, x, stridex, L);
+  }
+
+  double dc() const {
+    double s = 0.0;
+    for (int i = 0; i < 2 * K + 1; i++)
+      s += b[i];
+    return s;
+  }
+
+  void dc_normalize() {
+    const double DC = dc();
+    for (int i = 0; i < 2 * K + 1; i++)
+      b[i] /= DC;
   }
 
 private:
