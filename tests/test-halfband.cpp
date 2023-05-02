@@ -1,12 +1,15 @@
 #include <cmath>
 #include "../halfband.hpp"
 #include <iostream>
+#include <iomanip>
 #include <vector>
 #include <string>
 
 int main(int argc, 
          const char** argv)
 {
+
+  const int ndigits = 16;
 
   HalfbandFilter<5> hbf05;
   hbf05.init();
@@ -59,21 +62,22 @@ int main(int argc,
   else if (std::string(argv[1]) == "impulse")
   {
     int K = (hbf10.taps() - 1) / 2;
+    std::cout << std::setprecision(ndigits);
     std::cout << hbf10.coefficient(-K);
     for (int k = -K + 1; k <= K; k++) {
       std::cout << ", " << hbf10.coefficient(k); 
     }
     std::cout << std::endl;
   }
-  else if (std::string(argv[1]) == "chirp")
+  else if (std::string(argv[1]) == "test")
   {
     const int L = 365;
-    std::vector<double> x(L, 0.0);
+    std::vector<double> x(L, 1.0);
     std::vector<double> y(L, 0.0);
 
-    // ... generate actual chirp signal ...
-    hbf10.applyHold(y.data(), 1, x.data(), 1, x.size());
+    hbf10.applyZero(y.data(), 1, x.data(), 1, x.size());
 
+    std::cout << std::setprecision(ndigits);
     for (size_t i = 0; i < x.size(); i++) {
       std::cout << x[i] << ", " << y[i] << std::endl;
     }
