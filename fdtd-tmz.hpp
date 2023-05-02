@@ -477,6 +477,7 @@ public:
   void rasterizeEz(uint32_t* imgdata, 
                    int w, 
                    int h,
+                   bool viridis,
                    double ezmin,
                    double ezmax,
                    double xmin,
@@ -484,6 +485,7 @@ public:
                    double ymin,
                    double ymax) const
   {
+    uint32_t (*rgbfunc)(double) = (viridis ? rgb_d_viridis : rgb_d_jet);
     if (imgdata == nullptr) return;
     if (ezmin >= ezmax) return;
 
@@ -503,19 +505,22 @@ public:
         const double yj = ymax - j * yupp;
         const double yhatj = (yj - ygmin) / delta;
         const double Ezij = interpolate(Ez, xhati, yhatj);
-        imgdata[i + j * w] = rgb_viridis((Ezij - ezmin) / crange);
+        imgdata[i + j * w] = (*rgbfunc)((Ezij - ezmin) / crange);
       }
     }
   }
 
   void rasterizeTestPattern(uint32_t* imgdata, 
                             int w, 
-                            int h) const 
+                            int h,
+                            bool viridis) const 
   {
+    uint32_t (*rgbfunc)(int) = (viridis ? rgb_i_viridis : rgb_i_jet);
     if (imgdata == nullptr) return;
     for (int i = 0; i < w; i++) {
       for (int j = 0; j < h; j++) {
-        imgdata[i + j * w] = rgb_viridis((i + j + updateCounter) % 255);
+        //imgdata[i + j * w] = rgb_viridis((i + j + updateCounter) % 255);
+        imgdata[i + j * w] = (*rgbfunc)((i + j + updateCounter) % 255);
       }
     }
   }

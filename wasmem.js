@@ -77,6 +77,7 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
 
     var simTime = 0.0;
 
+    var useViridis = true;
     var useSourceColorValue = true;
     var minColorValue = 0.0;
     var maxColorValue = 0.0;
@@ -206,6 +207,10 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
         if (key == 'h' || key == 'H') {
             applyHalfbandFilter();
         }
+
+        if (key == 'k' || key == 'K') {
+            useViridis = !useViridis;
+        }
     }
 
     function keyUpEvent(e)
@@ -282,11 +287,13 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
         if (showTestPattern) {
             renderDataBufferTestPattern(dataArray.byteOffset, 
                                         width, 
-                                        height);
+                                        height,
+                                        useViridis);
         } else {
             renderDataBufferEz(dataArray.byteOffset, 
                                width, 
                                height, 
+                               useViridis,
                                useSourceColorValue, 
                                minColorValue, 
                                maxColorValue);

@@ -25,13 +25,15 @@ Run directly in browser: https://raw.githack.com/olofer/wasmem/main/payload/inde
 - `Z` toggle test rasterizer screen (see full colormap)
 - `S` toggle display of simulation information text
 - `H` apply a half-band filter to state fields
+- `K` change colormap (available: `viridis`, and classic `jet`)
 
 ### Notes
 - Boundary conditions can be reflective, absorbing, or periodic
 - The source location can be placed directly at the cursor with a mouse click
-- Swapping sources and BCs introduces sharp under-resolved transients
+- Swapping sources and BCs may introduce sharp under-resolved transients
 - It can be useful to press `C` a few times to adapt the colorscale
 - Instabilities may develop with absorbing BCs; reset with `R`, or damp with `D`
+- Pause and smooth field: `P`, then `H` a few times, then `P` to restart
 
 ### Local build & run
 Clone repo. Run `./build.sh` and then `./run-html.sh` (or e.g. `./run-html.sh wsl-edge` to select another browser, assuming WSL2 environment). For the build to succeed, the `emscripten` is requried (see link below).
@@ -42,7 +44,7 @@ Clone repo. Run `./build.sh` and then `./run-html.sh` (or e.g. `./run-html.sh ws
 - `emscripten`: https://github.com/emscripten-core/emsdk
 
 ## Tasklist
-- [ ] more source options & bandlimit 
+- [ ] source transient removal
 - [ ] visualization of $H_x$, $H_y$
-- [ ] medium editor
+- [ ] medium property editor
 - [ ] rasterizer speed up

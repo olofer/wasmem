@@ -247,16 +247,18 @@ uint32_t* initDataBuffer(int offset,
 EMSCRIPTEN_KEEPALIVE
 void renderDataBufferTestPattern(int offset, 
                                  int w, 
-                                 int h)
+                                 int h,
+                                 bool viridis)
 {
   uint32_t* data = reinterpret_cast<uint32_t*>(offset);
-  sim.rasterizeTestPattern(data, w, h);
+  sim.rasterizeTestPattern(data, w, h, viridis);
 }
 
 EMSCRIPTEN_KEEPALIVE
 void renderDataBufferEz(int offset, 
                         int w, 
                         int h,
+                        bool viridis,
                         bool useSourceAmp,
                         double cmin,
                         double cmax)
@@ -272,6 +274,7 @@ void renderDataBufferEz(int offset,
   sim.rasterizeEz(data, 
                   w, 
                   h, 
+                  viridis,
                   cmin, 
                   cmax, 
                   sim.getXmin(), 
