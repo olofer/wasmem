@@ -101,6 +101,15 @@ public:
       b[i] /= DC;
   }
 
+  double coefficient(int k) const {
+    if (k < -K || k > K) return 0.0;
+    return b[k + K];
+  }
+
+  int taps() const {
+    return 2 * K + 1;
+  }
+
 private:
   double b[2 * K + 1];
   double head[K];

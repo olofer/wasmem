@@ -1,2 +1,3 @@
 ./*.wasm
-tests/*.out
+tests/test-halfband.exe
+tests/*.txt
