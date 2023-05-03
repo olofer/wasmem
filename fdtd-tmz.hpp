@@ -26,19 +26,26 @@ struct fdtdSource
   double y;
   double amp;
   double delayMultiplier;
+  double theta;
+  double radiansPerTimestep;
 
   void initDefault() {
     type = fdtdSourceType::Monochromatic;
     additive = false;
-    ppw = 30.0;
     x = 0.05;
     y = 0.05;
     amp = 1.0;
     delayMultiplier = 2.0;
+    resetTheta();
+    setPPW(30.0);
   }
 
   double sinusoidal(double q) const {
     return amp * std::sin(2.0 * M_PI * courant_factor * q / ppw);
+  }
+
+  double sinusoidal() const {
+    return amp * std::sin(theta);
   }
 
   double ricker(int q) const {
@@ -57,6 +64,19 @@ struct fdtdSource
     type = fdtdSourceType::NoSource;
   }
 
+  void setPPW(int ppw) {
+    this->ppw = ppw;
+    this->radiansPerTimestep = 2.0 * M_PI * courant_factor / this->ppw;
+  }
+
+  void updateTheta() {
+    this->theta += this->radiansPerTimestep;
+  }
+
+  void resetTheta() {
+    this->theta = 0.0;
+  }
+
   // Compute conductivity (sigma) times space-step (delta) to achieve a skin-length of lhat space steps
   // for the present value of the source wavelength (expressed in PPW)
   double sigmaDelta(double lhat, 
@@ -66,13 +86,14 @@ struct fdtdSource
     return 1.0 / recip;
   }
 
-  double get(int counter) {
+  double get(int counter) const {
     double Sxy = 0.0;
 
     switch (this->type)
     {
     case fdtdSourceType::Monochromatic:
-      Sxy = sinusoidal(static_cast<double>(counter));
+      //Sxy = sinusoidal(static_cast<double>(counter));
+      Sxy = sinusoidal();
       break;
 
     case fdtdSourceType::RickerPulse:
@@ -80,7 +101,8 @@ struct fdtdSource
       break;
 
     case fdtdSourceType::SquareWave:
-      Sxy = (sinusoidal(static_cast<double>(counter)) < 0.0 ? -this->amp : this->amp);
+      //Sxy = (sinusoidal(static_cast<double>(counter)) < 0.0 ? -this->amp : this->amp);
+      Sxy = (sinusoidal() < 0.0 ? -this->amp : this->amp);
       break;
 
     case fdtdSourceType::Sawtooth:
@@ -268,6 +290,7 @@ public:
     zeroField();
     abc.zero();
     resetUpdateCount();
+    source.resetTheta();
   }
 
   int getNX() const { return NX; }
@@ -413,6 +436,7 @@ public:
 
     applySource();
 
+    source.updateTheta();
     updateCounter++;
   }
 
@@ -572,8 +596,9 @@ public:
   }
 
   void sourceTune(double dppw) {
-    source.ppw += dppw;
-    if (source.ppw < 2.0) source.ppw = 2.0;
+    double new_ppw = source.ppw + dppw;
+    if (new_ppw < 2.0) new_ppw = 2.0;
+    source.setPPW(new_ppw);
   }
 
   void sourceType(fdtdSourceType s) {
@@ -792,6 +817,9 @@ private:
 
     const int iy = integery(source.y);
     if (iy < 0 || iy >= NY)
+      return;
+
+    if (source.type == fdtdSourceType::NoSource)
       return;
 
     const double Sxy = source.get(updateCounter);
