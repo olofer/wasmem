@@ -66,6 +66,34 @@ struct fdtdSource
     return 1.0 / recip;
   }
 
+  double get(int counter) {
+    double Sxy = 0.0;
+
+    switch (this->type)
+    {
+    case fdtdSourceType::Monochromatic:
+      Sxy = sinusoidal(static_cast<double>(counter));
+      break;
+
+    case fdtdSourceType::RickerPulse:
+      Sxy = ricker(counter);
+      break;
+
+    case fdtdSourceType::SquareWave:
+      Sxy = (sinusoidal(static_cast<double>(counter)) < 0.0 ? -this->amp : this->amp);
+      break;
+
+    case fdtdSourceType::Sawtooth:
+      Sxy = sawtooth(counter);
+      break;
+
+    case fdtdSourceType::NoSource:
+      break;
+    }
+
+    return Sxy;
+  }
+
 };
 
 template <int NX, int NY>
@@ -766,29 +794,7 @@ private:
     if (iy < 0 || iy >= NY)
       return;
 
-    double Sxy = 0.0;
-
-    switch (source.type)
-    {
-    case fdtdSourceType::Monochromatic:
-      Sxy = source.sinusoidal(static_cast<double>(updateCounter));
-      break;
-
-    case fdtdSourceType::RickerPulse:
-      Sxy = source.ricker(updateCounter);
-      break;
-
-    case fdtdSourceType::SquareWave:
-      Sxy = (source.sinusoidal(static_cast<double>(updateCounter)) < 0.0 ? -source.amp : source.amp);
-      break;
-
-    case fdtdSourceType::Sawtooth:
-      Sxy = source.sawtooth(updateCounter);
-      break;
-
-    case fdtdSourceType::NoSource:
-      return;
-    }
+    const double Sxy = source.get(updateCounter);
 
     if (source.additive) {
       Ez[index(ix, iy)] += Sxy;
