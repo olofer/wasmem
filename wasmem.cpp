@@ -212,17 +212,17 @@ int getNY(void) {
 }
 
 EMSCRIPTEN_KEEPALIVE
-double getEta0(void) {
+double getVacuumImpedance(void) {
   return vacuum_impedance;
 }
 
 EMSCRIPTEN_KEEPALIVE
-double getVel0(void) {
+double getVacuumVelocity(void) {
   return vacuum_velocity;
 }
 
 EMSCRIPTEN_KEEPALIVE
-double getCourant(void) {
+double getCourantFactor(void) {
   return courant_factor;
 }
 

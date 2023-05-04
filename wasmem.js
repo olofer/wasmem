@@ -38,13 +38,17 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
 
     var getNX = results.instance.exports.getNX;
     var getNY = results.instance.exports.getNY;
-    var getEta0 = results.instance.exports.getEta0;
-    var getVel0 = results.instance.exports.getVel0;
-    var getCourant = results.instance.exports.getCourant;
+    var getVacuumImpedance = results.instance.exports.getVacuumImpedance;
+    var getVacuumVelocity = results.instance.exports.getVacuumVelocity;
+    var getCourantFactor = results.instance.exports.getCourantFactor;
     var getDelta = results.instance.exports.getDelta;
     var getTimestep = results.instance.exports.getTimestep;
     var minimumEz = results.instance.exports.minimumEz;
     var maximumEz = results.instance.exports.maximumEz;
+
+    var dropGaussian = results.instance.exports.dropGaussian;
+    var fieldEnergyE = results.instance.exports.fieldEnergyE;
+    var fieldEnergyB = results.instance.exports.fieldEnergyB;
 
     var sourceAdditive = results.instance.exports.sourceAdditive;
     var isSourceAdditive = results.instance.exports.isSourceAdditive;
@@ -57,10 +61,6 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
     var sourceRicker = results.instance.exports.sourceRicker;
     var sourceSquare = results.instance.exports.sourceSquare;
     var sourceSaw = results.instance.exports.sourceSaw;
-
-    var dropGaussian = results.instance.exports.dropGaussian;
-    var fieldEnergyE = results.instance.exports.fieldEnergyE;
-    var fieldEnergyB = results.instance.exports.fieldEnergyB;
 
     var initDataBuffer = results.instance.exports.initDataBuffer;
     var renderDataBufferTestPattern = results.instance.exports.renderDataBufferTestPattern;
@@ -254,9 +254,9 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
     console.log('NY = ' + getNY());
     console.log('delta = ' + getDelta() + ' [m]');
     console.log('timestep = ' + getTimestep() + '[s]');
-    console.log('Courant factor = ' + getCourant());
-    console.log('vacuum impendance = ' + getEta0());
-    console.log('vacuum velocity = ' + getVel0());
+    console.log('Courant factor = ' + getCourantFactor());
+    console.log('vacuum impedance = ' + getVacuumImpedance());
+    console.log('vacuum velocity = ' + getVacuumVelocity());
     console.log('isVacuum() = ' + isVacuum());
 
     const domainWidth = getDelta() * getNX();
