@@ -1,3 +1,5 @@
+#pragma once
+
 enum fdtdSourceType {
   NoSource,
   Monochromatic,
@@ -50,6 +52,26 @@ struct fdtdSource
     return (-1 + 2.0 * static_cast<double>(q % Q) / Q) * (this->amp);
   }
 
+  double soft_sawtooth() const {
+    // (sin(x) - 1/2 sin(2 x) + 1/3 sin(3 x) - 1/4 sin(4 x) + 1/5 sin(5 x)) * (2 / pi)
+    const double multiplier = (2.0 / M_PI) * amp;
+    double s = std::sin(theta);
+    s -= std::sin(2.0 * theta) / 2.0;
+    s += std::sin(3.0 * theta) / 3.0;
+    s -= std::sin(4.0 * theta) / 4.0;
+    s += std::sin(5.0 * theta) / 5.0;
+    return s * multiplier;
+  }
+
+  double soft_squarewave() const {
+    const double multiplier = (4.0 / M_PI) * amp;
+    double s = std::sin(theta);
+    s += std::sin(3.0 * theta) / 3.0;
+    s += std::sin(5.0 * theta) / 5.0;
+    s += std::sin(7.0 * theta) / 7.0;
+    return s * multiplier;
+  }
+
   void off() {
     type = fdtdSourceType::NoSource;
   }
@@ -92,11 +114,13 @@ struct fdtdSource
 
     case fdtdSourceType::SquareWave:
       //Sxy = (sinusoidal(static_cast<double>(counter)) < 0.0 ? -this->amp : this->amp);
-      Sxy = (sinusoidal() < 0.0 ? -this->amp : this->amp);
+      //Sxy = (sinusoidal() < 0.0 ? -this->amp : this->amp);
+      Sxy = soft_squarewave();
       break;
 
     case fdtdSourceType::Sawtooth:
-      Sxy = sawtooth(counter);
+      //Sxy = sawtooth(counter);
+      Sxy = soft_sawtooth();
       break;
 
     case fdtdSourceType::NoSource:

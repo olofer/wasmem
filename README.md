@@ -19,8 +19,8 @@ Run directly in browser: https://raw.githack.com/olofer/wasmem/main/payload/inde
 - `0` turn off source (no source)
 - `1` sinusoidal continuous source
 - `2` pulsed Ricker wavelet source
-- `3` square wave source (unresolved)
-- `4` sawtooth wave source (unresolved)
+- `3` square wave source (truncated Fourier series)
+- `4` sawtooth wave source (trunc. F. series)
 - `G` superimpose a Gaussian into the domain center
 - `Z` toggle test rasterizer screen (see full colormap)
 - `S` toggle display of simulation information text
@@ -44,7 +44,6 @@ Clone repo. Run `./build.sh` and then `./run-html.sh` (or e.g. `./run-html.sh ws
 - `emscripten`: https://github.com/emscripten-core/emsdk
 
 ## Tasklist
-- [ ] source transient removal
 - [ ] visualization of $H_x$, $H_y$
 - [ ] medium property editor
 - [ ] rasterizer speed up
