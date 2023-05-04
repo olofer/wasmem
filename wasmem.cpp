@@ -4,6 +4,8 @@
 
 #include "halfband.hpp"
 #include "rgb-utils.hpp"
+#include "fdtd-constants.hpp"
+#include "fdtd-source.hpp"
 #include "fdtd-tmz.hpp"
 
 const int NX = 300;
@@ -146,27 +148,27 @@ double sourceTuneGet(void) {
 
 EMSCRIPTEN_KEEPALIVE
 void sourceNone(void) {
-  sim.sourceType(TMz::fdtdSourceType::NoSource);
+  sim.sourceType(fdtdSourceType::NoSource);
 }
 
 EMSCRIPTEN_KEEPALIVE
 void sourceMono(void) {
-  sim.sourceType(TMz::fdtdSourceType::Monochromatic);
+  sim.sourceType(fdtdSourceType::Monochromatic);
 }
 
 EMSCRIPTEN_KEEPALIVE
 void sourceRicker(void) {
-  sim.sourceType(TMz::fdtdSourceType::RickerPulse);
+  sim.sourceType(fdtdSourceType::RickerPulse);
 }
 
 EMSCRIPTEN_KEEPALIVE
 void sourceSquare(void) {
-  sim.sourceType(TMz::fdtdSourceType::SquareWave);
+  sim.sourceType(fdtdSourceType::SquareWave);
 }
 
 EMSCRIPTEN_KEEPALIVE
 void sourceSaw(void) {
-  sim.sourceType(TMz::fdtdSourceType::Sawtooth);
+  sim.sourceType(fdtdSourceType::Sawtooth);
 }
 
 EMSCRIPTEN_KEEPALIVE
@@ -211,17 +213,17 @@ int getNY(void) {
 
 EMSCRIPTEN_KEEPALIVE
 double getEta0(void) {
-  return TMz::vacuum_impedance;
+  return vacuum_impedance;
 }
 
 EMSCRIPTEN_KEEPALIVE
 double getVel0(void) {
-  return TMz::vacuum_velocity;
+  return vacuum_velocity;
 }
 
 EMSCRIPTEN_KEEPALIVE
 double getCourant(void) {
-  return TMz::courant_factor;
+  return courant_factor;
 }
 
 EMSCRIPTEN_KEEPALIVE
