@@ -272,13 +272,11 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
    
     function main()
     {
-        window.requestAnimationFrame(main);
-
-        var currentTime = Date.now();
-        var elapsedTime = currentTime - startTime;
+        const currentTime = Date.now();
+        const elapsedTime = currentTime - startTime;
         startTime = currentTime;
 
-        var elapsedTimeSeconds = elapsedTime * 1.0e-3;
+        const elapsedTimeSeconds = elapsedTime * 1.0e-3;
         time += elapsedTimeSeconds;
 
         if (elapsedTimeSeconds > 0.0 && elapsedTimeSeconds < 1.0)
@@ -323,10 +321,12 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
             ctx.fillText('xdim, ydim = ' + (domainWidth * 100.0).toFixed(1) + ', ' + (domainHeight * 100.0).toFixed(1) + ' [cm]', 10.0, 690.0);
         }
 
-        if (pauseUpdater) return;
+        if (!pauseUpdater) {
+            takeOneTimestep();
+            simTime += getTimestep();
+        }
 
-        takeOneTimestep();
-        simTime += getTimestep();
+        window.requestAnimationFrame(main);
     }
 
     window.addEventListener('keydown', keyDownEvent);
