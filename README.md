@@ -46,4 +46,3 @@ Clone repo. Run `./build.sh` and then `./run-html.sh` (or e.g. `./run-html.sh ws
 ## Tasklist
 - [ ] visualization of $H_x$, $H_y$
 - [ ] medium property editor
-- [ ] rasterizer speed up
