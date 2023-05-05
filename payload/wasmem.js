@@ -77,6 +77,7 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
 
     var simTime = 0.0;
 
+    var sourceName = 'sine';
     var useViridis = true;
     var useSourceColorValue = true;
     var minColorValue = 0.0;
@@ -124,22 +125,27 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
 
         if (key == '0') {
             sourceNone();
+            sourceName = 'off';
         }
 
         if (key == '1') {
             sourceMono();
+            sourceName = 'sine';
         }
 
         if (key == '2') {
             sourceRicker();
+            sourceName = 'ricker';
         }
 
         if (key == '3') {
             sourceSquare();
+            sourceName = '~square';
         }
 
         if (key == '4') {
             sourceSaw();
+            sourceName = '~sawtooth';
         }
 
         if (key == 'c' || key == 'C') {
@@ -213,11 +219,11 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
         }
     }
 
-    function keyUpEvent(e)
+    /*function keyUpEvent(e)
     {
         var code = e.keyCode;
         var key = e.key;
-    }
+    }*/
 
     console.log('sim data ptr = ' + simulatorAddress());
     console.log('sim bytesize = ' + simulatorBytesize());
@@ -307,6 +313,7 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
             const sourcePPW = sourceTuneGet()
             const sourceLambda = sourcePPW * getDelta();
             var src_str = 'src = ' + (sourceLambda * 100.0).toFixed(3) + ' [cm] (' + sourcePPW.toFixed(1) + ' ppw)';
+            src_str += ' ' + sourceName + ' :';
             if (isSourceAdditive()) src_str += ' additive'; else src_str += ' hardwired';
             ctx.fillText(src_str, 10.0, 60.0);
 
@@ -330,7 +337,7 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
     }
 
     window.addEventListener('keydown', keyDownEvent);
-    window.addEventListener('keyup', keyUpEvent);
+    //window.addEventListener('keyup', keyUpEvent);
 
     function handleMouseDown(event) {
         const rect = canvas.getBoundingClientRect();
