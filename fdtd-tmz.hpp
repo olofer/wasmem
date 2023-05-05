@@ -436,13 +436,17 @@ public:
     const double xgmin = getXmin();
     const double ygmin = getYmin();
 
+    const double Y0 = (ymax - ygmin) / delta;
+    const double Y1 = -1.0 * yupp / delta;
+
     for (int i = 0; i < w; i++) {
       const double xi = xmin + i * xupp;
       const double xhati = (xi - xgmin) / delta;
       for (int j = 0; j < h; j++) {
-        const double yj = ymax - j * yupp;
-        const double yhatj = (yj - ygmin) / delta;
+        //const double yj = ymax - j * yupp;
+        //const double yhatj = (yj - ygmin) / delta;
         //const double Ezij = interpolate(Ez, xhati, yhatj);
+        const double yhatj = Y0 + Y1 * j;
         const float Ezij = interpolate_float(Ez, (float) xhati, (float) yhatj);
         imgdata[i + j * w] = (*rgbfunc)(A * Ezij + B);
       }
