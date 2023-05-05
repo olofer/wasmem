@@ -421,12 +421,14 @@ public:
                    double ymin,
                    double ymax) const
   {
-    uint32_t (*rgbfunc)(double) = (viridis ? rgb_d_viridis : rgb_d_jet);
+    uint32_t (*rgbfunc)(float) = (viridis ? rgb_d_viridis : rgb_d_jet);
     if (imgdata == nullptr) return;
     if (ezmin >= ezmax) return;
 
     const double delta = getDelta();
     const double crange = ezmax - ezmin;
+    const float A = (float) (1.0 / crange);
+    const float B = (float) (-1.0 * ezmin / crange);
 
     const double xupp = (xmax - xmin) / w; // x units per pixel
     const double yupp = (ymax - ymin) / h; // y units per pixel
@@ -440,8 +442,9 @@ public:
       for (int j = 0; j < h; j++) {
         const double yj = ymax - j * yupp;
         const double yhatj = (yj - ygmin) / delta;
-        const double Ezij = interpolate(Ez, xhati, yhatj);
-        imgdata[i + j * w] = (*rgbfunc)((Ezij - ezmin) / crange);
+        //const double Ezij = interpolate(Ez, xhati, yhatj);
+        const float Ezij = interpolate_float(Ez, (float) xhati, (float) yhatj);
+        imgdata[i + j * w] = (*rgbfunc)(A * Ezij + B);
       }
     }
   }
@@ -455,7 +458,6 @@ public:
     if (imgdata == nullptr) return;
     for (int i = 0; i < w; i++) {
       for (int j = 0; j < h; j++) {
-        //imgdata[i + j * w] = rgb_viridis((i + j + updateCounter) % 255);
         imgdata[i + j * w] = (*rgbfunc)((i + j + updateCounter) % 255);
       }
     }
@@ -581,6 +583,30 @@ private:
     const double w01 = (1.0 - etax) * etay;
     const double w10 = etax * (1.0 - etay);
     const double w11 = etax * etay;
+
+    return w00 * v00 + w01 * v01 + w10 * v10 + w11 * v11;
+  }
+
+  float interpolate_float(const double* f,
+                          float xhat, 
+                          float yhat) const
+  {
+    const int xi = (int) xhat;
+    const int yi = (int) yhat;
+    const float etax = xhat - xi;
+    const float etay = yhat - yi;
+
+    const int idx = index(xi, yi);
+
+    const float v00 = (float) f[idx];
+    const float v01 = (float) f[idx + NX];
+    const float v10 = (float) f[idx + 1];
+    const float v11 = (float) f[idx + 1 + NX];
+
+    const float w00 = (1.0 - etax) * (1.0 - etay);
+    const float w01 = (1.0 - etax) * etay;
+    const float w10 = etax * (1.0 - etay);
+    const float w11 = etax * etay;
 
     return w00 * v00 + w01 * v01 + w10 * v10 + w11 * v11;
   }

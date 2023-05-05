@@ -26,7 +26,7 @@ uint32_t rgb_i_viridis(int i) {
                    rgb_table_viridis[j + 2]);
 }
 
-uint32_t rgb_d_viridis(double l) {
+uint32_t rgb_d_viridis(float l) {
   int i = static_cast<int>(255.0 * l);
   if (i < 0) i = 0;
   if (i > 255) i = 255;
@@ -44,7 +44,7 @@ uint32_t rgb_i_jet(int i) {
                    rgb_table_jet[j + 2]);
 }
 
-uint32_t rgb_d_jet(double l) {
+uint32_t rgb_d_jet(float l) {
   int i = static_cast<int>(255.0 * l);
   if (i < 0) i = 0;
   if (i > 255) i = 255;
