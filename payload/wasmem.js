@@ -176,15 +176,15 @@ WebAssembly.instantiateStreaming(fetch('wasmem.wasm'), importObject)
         }
 
         if (key == 'x' || key == 'X') { // cycle boundary condition style for X dimension
-            if (getAbsorbingX()) setPeriodicX();
-                else if (getPeriodicX()) setPECX();
-                    else setAbsorbingX();
+            if (getPeriodicX()) setAbsorbingX(); 
+                else if (getAbsorbingX()) setPECX();
+                    else setPeriodicX();
         }
 
         if (key == 'y' || key == 'Y') { // cycle BC for Y dimension
-            if (getAbsorbingY()) setPeriodicY();
-                else if (getPeriodicY()) setPECY();
-                    else setAbsorbingY();
+            if (getPeriodicY()) setAbsorbingY(); 
+                else if (getAbsorbingY()) setPECY();
+                    else setPeriodicY();
         }
 
         if (key == 'd' || key == 'D') {

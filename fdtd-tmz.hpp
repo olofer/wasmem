@@ -340,14 +340,16 @@ public:
     absorbingLeft = false;
     absorbingRight = false;
     periodicAlongX = true;
-    //if (isAbsorbingY()) abc.cornerExclude();
+    const int taper = 8;
+    taperBorderX(taper);
   }
 
   void setPeriodicY() {
     absorbingTop = false;
     absorbingBottom = false;
     periodicAlongY = true;
-    //if (isAbsorbingX()) abc.cornerExclude();
+    const int taper = 8;
+    taperBorderY(taper);
   }
 
   void setAbsorbingX() {
@@ -358,7 +360,6 @@ public:
     abc.zeroX();
     taperBorderX(taper);
     if (isAbsorbingY()) {
-      //abc.cornerInclude();
       abc.zeroY();
       taperBorderY(taper);
     }
@@ -372,7 +373,6 @@ public:
     abc.zeroY();
     taperBorderY(taper);
     if (isAbsorbingX()) {
-      //abc.cornerInclude();
       abc.zeroX();
       taperBorderX(taper);
     }
